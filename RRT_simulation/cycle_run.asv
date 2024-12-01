@@ -1,8 +1,0 @@
-global len nodeNum time
-total_len = 0;
-total_nodeNum = 0;
-total_time = 0;
-for i = 1:10  % 例如执行 10 次
-    run('RRT_Connect.m');  % 执行 myScript.m 脚本
-    total_len = total_len + le
-end
