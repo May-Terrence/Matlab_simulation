@@ -1,4 +1,4 @@
-function plotFigure(map_size,startPos, goalPos, map, treeNodes1,treeNodes2,path_opt)
+function plotRrtStarConnect(map_size,startPos, goalPos, map, treeNodes1,treeNodes2,path_opt)
 figure
 %% 可视化地图
 % 画起点和终点

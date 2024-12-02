@@ -1,4 +1,4 @@
-global len pathNode sampleNode time
+global path_len pathNode_size sampleNode_size time
 total_len = 0;
 total_pathNode = 0;
 total_sampleNode = 0;
@@ -9,9 +9,9 @@ for index = 1:1:count
 %     run('RRT_star1.m');
 %     run('RRT_Connect.m');
     run('RRT.m');
-    total_len = total_len + len;
-    total_pathNode = total_pathNode + pathNode;
-    total_sampleNode = total_sampleNode + sampleNode;
+    total_len = total_len + path_len;
+    total_pathNode = total_pathNode + pathNode_size;
+    total_sampleNode = total_sampleNode + sampleNode_size;
     total_time = total_time + time;
     progress = index * 100 / count
 end

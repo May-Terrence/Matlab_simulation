@@ -1,9 +1,9 @@
 % RRT-connect算法
 % clc
 % clear
-close all
+% close all
 tic
-global len pathNode sampleNode time 
+global path_len pathNode_size sampleNode_size time path_opt path_Quasi_Uniform_BSpline
 %% 地图构建
 map_size = [50, 30];
 startPos = [2,2];
@@ -221,13 +221,17 @@ for i = 1:2
         end
     end
 end
-
+if path_opt(end) ~= goalPos
+    path_opt = path_opt(end:-1:1,:); % 反转
+end
 % 路径长度
 path_diff = diff(path_opt);
-len = sum(sqrt(path_diff(:,1).^2 + path_diff(:,2).^2));
-pathNode = size(path_opt, 1);
-sampleNode = size(treeNodes2, 2) + size(treeNodes1, 2);
+path_len = sum(sqrt(path_diff(:,1).^2 + path_diff(:,2).^2))
+pathNode_size = size(path_opt, 1);
+sampleNode_size = size(treeNodes2, 2) + size(treeNodes1, 2);
 time = toc;
-
+run('Bspline.m');
+path_Quasi_Uniform_BSpline(end+1,:) = goalPos;
 %% 画图
-% plotFigureRrtConnect(map_size,startPos, goalPos, map, treeNodes1,treeNodes2,path_opt)
+plotRrtStarConnect(map_size,startPos, goalPos, map, treeNodes1,treeNodes2,path_opt)
+plot(path_Quasi_Uniform_BSpline(:,1),path_Quasi_Uniform_BSpline(:,2),'k','linewidth',1)

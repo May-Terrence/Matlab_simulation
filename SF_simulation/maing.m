@@ -1,7 +1,7 @@
 %% 常量定义
 clc;
 clear all;
-% close all;
+close all;
 import PID.*
 INDI = 1;
 %% 常量定义，针对9吋涵道模型
@@ -11,6 +11,7 @@ global m I k_T0  k_Th k_Ts sd k_Ns d_cs d_MS d_ds S den k_cpx l_cpz  Vw D   AOA 
 global  D_x D_y D_z    
 global speed c1 c2 c3 c4 
 global F_x F_y F_z Fm Fp Mcs Mds Mprop D_cs csAOA J T M_aero M_fan M_vane M_flap M_gyro qw
+global path_Quasi_Uniform_BSpline path_len
 
 %用于计算拉力T（模型内）
 k_T0 = 9.9796018325697625989171178675552e-6;%悬停时的拉力系数
@@ -72,9 +73,18 @@ B_pseudo =  [  -1.0000,   -0.0000,    1.0000;
 alpha_filt_param.CNT = 1;
 alpha_filt_param.CCR = 40;
 %% 状态变量初始化
+
+run('RRT_Star_Connect.m');
 % data = data(1:1000, :);
 % N = length(data(:, 1));
-N = 1000; %仿真时长，单位10ms，N=1000表示仿真10s
+Bspline_path_diff = diff(path_Quasi_Uniform_BSpline);
+Bspline_path_len = cumsum(sqrt(Bspline_path_diff(:,1).^2 + Bspline_path_diff(:,2).^2));
+N = round(Bspline_path_len(end)) * 100;
+Bspline_path_len = Bspline_path_len * N / Bspline_path_len(end) / 100;
+time_list = linspace(0, N, size(Bspline_path_len, 1));
+time_list_idx = 1;
+
+% N = 1000; %仿真时长，单位10ms，N=1000表示仿真10s
 ts = 0.01; %控制器执行频率
 time = zeros(N, 1);
 for i = 1:1:N
@@ -125,7 +135,7 @@ output_f = [0; 0; 0];  %反馈输出
 output_0 = [0; 0; 0];  %角速度环上一时刻输出滤波值
 output = [0; 0; 0];  %控制输出/舵片虚拟输入
 
-pRef = [0; 0; -10];  %期望位置/参考位置
+pRef = [2; 2; -10];  %期望位置/参考位置
 vD = [0; -3.7; 0];  %期望速度
 vD = [0; 0; 0]; 
 vRef = [0; 0; 0];  %参考速度
@@ -287,9 +297,9 @@ for i = 1:1:N
 %   pRef = [3.5 * sin((i - 1) / 500 * 2 * pi - pi / 2) + 3.5; 
 %           3.5 * cos((i - 1) / 500 * 2 * pi - pi / 2);
 %                           -10                      ];%circle
-  pRef = [-3.5 * cos((i - 1) / N * 2 * pi) + 3.5
-           3.5 * sin((i - 1) / N * 2 * pi)
-                          -10               ];%circle
+%   pRef = [-3.5 * cos((i - 1) / N * 2 * pi) + 3.5
+%            3.5 * sin((i - 1) / N * 2 * pi)
+%                           -10               ];%circle
 %   pRef = [3 * sin((i - 1) / N * 3 * pi - pi / 2) + 3;
 %                 3 * sin((i - 1) / (N/2) * 2 * pi - pi);
 %                         -10];
@@ -299,6 +309,10 @@ for i = 1:1:N
 %     pRef = [i / 100; 0; -10];
 %     pRef = [0; 0; -10 - 5*i/2000];
 %     pRef = [0; 0; -10];
+    if i >= time_list(time_list_idx)
+        time_list_idx = time_list_idx + 1;
+    end
+    pRef = [path_Quasi_Uniform_BSpline(time_list_idx, 1); path_Quasi_Uniform_BSpline(time_list_idx, 2); -10];
     eP = pRef - pFdb;%位置误差（期望位置-状态位置）
 %     eP = [0; 0; 0;];
     
@@ -468,7 +482,7 @@ end
     end
 %%   分配和结果输出
     %----------------------------------------------------------------------
-     clc;
+%      clc;
      progress = i / N * 100 %表示进度
      speed = sqrt(f / k_T0); %桨转速
     Vb = Rn2b * vFdb; % TODO 考虑航向
