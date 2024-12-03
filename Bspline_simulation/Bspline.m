@@ -2,7 +2,7 @@
 % clc
 % clear
 % close all
-global path_opt path_Quasi_Uniform_BSpline
+global path_opt path_Quasi_Uniform_BSpline path_len
 %% 数据定义
 k = 4;                                    % k阶、k-1次B样条
 P = [0, 1, 2, 3, 4;
@@ -28,7 +28,9 @@ for i = 2
         end
     elseif i == 2 % 准均匀B样条
         path_Quasi_Uniform_BSpline = [];
-        for u = 0 : 0.005 : 1-0.005
+        delta = 0.02 / path_len;
+%         for u = 0 : 0.005 : 1-0.005
+        for u = 0 : delta : 1 - delta
             for j = 0 : 1 : n
                 Bik(j+1, 1) = BaseFunction(j, k-1 , u, nodeVector);
             end
@@ -88,21 +90,21 @@ end
 % set([hXLabel, hYLabel], 'FontSize', 16)
 
 % 画准均匀B样条曲线
-figure
-hold on
-grid on
-% 主体图形绘制
-plot(P(1,:), P(2,:),'-','LineWidth', 3,  'Color', [.3, .6, .9]);
-plot(path_Quasi_Uniform_BSpline(:,1),path_Quasi_Uniform_BSpline(:,2),'LineWidth', 1,  'Color', 'r')
-scatter(P(1,:), P(2,:), 40,'MarkerEdgeColor','g','MarkerFaceColor','g');
-% 坐标轴
-set(gca,'LineWidth',2.5,'FontName', 'Times New Roman')
-hXLabel = xlabel('x');
-hYLabel = ylabel('y');
-% 修改刻度标签字体和字号
-set(gca, 'FontSize', 16),...
-set([hXLabel, hYLabel], 'FontName',  'simsun')
-set([hXLabel, hYLabel], 'FontSize', 16)
+% figure
+% hold on
+% grid on
+% % 主体图形绘制
+% plot(P(1,:), P(2,:),'-','LineWidth', 3,  'Color', [.3, .6, .9]);
+% plot(path_Quasi_Uniform_BSpline(:,1),path_Quasi_Uniform_BSpline(:,2),'LineWidth', 1,  'Color', 'r')
+% scatter(P(1,:), P(2,:), 40,'MarkerEdgeColor','g','MarkerFaceColor','g');
+% % 坐标轴
+% set(gca,'LineWidth',2.5,'FontName', 'Times New Roman')
+% hXLabel = xlabel('x');
+% hYLabel = ylabel('y');
+% % 修改刻度标签字体和字号
+% set(gca, 'FontSize', 16),...
+% set([hXLabel, hYLabel], 'FontName',  'simsun')
+% set([hXLabel, hYLabel], 'FontSize', 16)
 
 % % 画多段贝塞尔曲线
 % figure
