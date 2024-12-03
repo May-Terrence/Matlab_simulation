@@ -1,11 +1,11 @@
-%% ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+%% ³£Á¿¶¨Òå
 clc;
 clear all;
 close all;
 import PID.*
 INDI = 1;
-%% ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½å£¬ï¿½ï¿½ï¿½9ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä£ï¿½ï¿½
-%----------------------ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½------------------------------------------------
+%% ³£Á¿¶¨Òå£¬Õë¶Ô9…¼º­µÀÄ£ÐÍ
+%----------------------³õÊ¼»¯³£Á¿------------------------------------------------
 global Fy Vci Ma Tz Tt
 global m I k_T0  k_Th k_Ts sd k_Ns d_cs d_MS d_ds S den k_cpx l_cpz  Vw D   AOA  l_1 l_2 I_prop  G c_m
 global  D_x D_y D_z    
@@ -13,39 +13,39 @@ global speed c1 c2 c3 c4
 global F_x F_y F_z Fm Fp Mcs Mds Mprop D_cs csAOA J T M_aero M_fan M_vane M_flap M_gyro qw
 global path_Quasi_Uniform_BSpline path_len
 
-%ï¿½ï¿½ï¿½Ú¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Tï¿½ï¿½Ä£ï¿½ï¿½ï¿½Ú£ï¿½
-k_T0 = 9.9796018325697625989171178675552e-6;%ï¿½ï¿½Í£Ê±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ïµï¿½ï¿½
-k_Th = 5.646e-06;%ï¿½ï¿½ï¿½ï¿½ï¿½æº­ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ó­ï¿½Çµï¿½Ë¥ï¿½ï¿½Ïµï¿½ï¿½
-k_Ts = -2.247e-05;%ï¿½ï¿½ï¿½ï¿½ï¿½æº­ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ó­ï¿½Çµï¿½Ë¥ï¿½ï¿½Ïµï¿½ï¿½
-D = 0.228;%ï¿½ï¿½ï¿½ï¿½Ö±ï¿½ï¿½
-D_x = 0;%ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Éµï¿½ï¿½Ù¶ï¿½Ë¥ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ïµ
+%ÓÃÓÚ¼ÆËãÀ­Á¦T£¨Ä£ÐÍÄÚ£©
+k_T0 = 9.9796018325697625989171178675552e-6;%ÐüÍ£Ê±µÄÀ­Á¦ÏµÊý
+k_Th = 5.646e-06;%À­Á¦Ëæº­µÀ±¾µØÓ­½ÇµÄË¥¼õÏµÊý
+k_Ts = -2.247e-05;%À­Á¦Ëæº­µÀ±¾µØÓ­½ÇµÄË¥¼õÏµÊý
+D = 0.228;%·çÉÈÖ±¾¶
+D_x = 0;%¿ÕÆø×èÁ¦Ôì³ÉµÄËÙ¶ÈË¥¼õ£¬»úÌåÏµ
 D_y = 0;
 D_z = 0;
-D_x_n = 0;%ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Éµï¿½ï¿½Ù¶ï¿½Ë¥ï¿½ï¿½ï¿½ï¿½nedÏµ
+D_x_n = 0;%¿ÕÆø×èÁ¦Ôì³ÉµÄËÙ¶ÈË¥¼õ£¬nedÏµ
 D_y_n = 0;
 D_z_n = 0;
 
-% ï¿½ï¿½ï¿½Ú¼ï¿½ï¿½ãº­ï¿½ï¿½ï¿½ï¿½ï¿½Ú·ï¿½ï¿½Ù£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
-sd = 0.7;%ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ñ¹ï¿½ï¿½
-den = 1.225;%ï¿½ï¿½ï¿½ï¿½ï¿½Ü¶ï¿½kg/m^3
-S = 0.040828138126052952;%ï¿½ï¿½ï¿½È½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+% ÓÃÓÚ¼ÆËãº­µÀ³ö¿Ú·çËÙ£¬½ø¶ø¼ÆËãÁ¦¾Ø
+sd = 0.7;%º­µÀÀ©Ñ¹±È
+den = 1.225;%¿ÕÆøÃÜ¶Èkg/m^3
+S = 0.040828138126052952;%·çÉÈ½°ÅÌÃæ»ý
 
-d_cs = 0.0149564 * 0.7 * 0.7; %ï¿½ï¿½ï¿½Ú¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ø£ï¿½ï¿½ï¿½Å¤ï¿½à£©
+d_cs = 0.0149564 * 0.7 * 0.7; %ÓÃÓÚ¼ÆËã¶æÃæÆø¶¯Á¦ºÍÁ¦¾Ø£¨·´Å¤¾à£©
 
-k_Ns = 0.0008593;%ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
-d_MS = 1.1334291042e-7;%ï¿½ï¿½ï¿½ï¿½Å¤ï¿½ï¿½Ïµï¿½ï¿½
-d_ds = -1.3931461486e-5 / 2; %ï¿½ï¿½ï¿½ï¿½Ì¶ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Å¤ï¿½ï¿½
-% d_ds = -1.3931461486e-5; %ï¿½ï¿½ï¿½ï¿½Ì¶ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Å¤ï¿½ï¿½
-I_prop = 0.000037;%ï¿½ï¿½ï¿½Ú¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½, Ë³Ê±ï¿½ï¿½ï¿½ï¿½×ª
-l_cpz = -0.055;%to be modified ï¿½ï¿½ï¿½Ú¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
-k_cpx = -0.0012; %ï¿½ï¿½ï¿½Ú¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+k_Ns = 0.0008593;%¼ÆËã²àÏòÁ¦
+d_MS = 1.1334291042e-7;%·çÉÈÅ¤¾ØÏµÊý
+d_ds = -1.3931461486e-5 / 2; %¼ÆËã¹Ì¶¨½óÒí·´Å¤¾Ø
+% d_ds = -1.3931461486e-5; %¼ÆËã¹Ì¶¨½óÒí·´Å¤¾Ø
+I_prop = 0.000037;%ÓÃÓÚ¼ÆËãÍÓÂÝÁ¦¾Ø, Ë³Ê±ÕëÐý×ª
+l_cpz = -0.055;%to be modified ÓÃÓÚ¼ÆËã¿ÕÆø¶¯Á¦¾Ø
+k_cpx = -0.0012; %ÓÃÓÚ¼ÆËã¿ÕÆø¶¯Á¦¾Ø
 
 g = 9.788;
 m = 1.85; %1.53;%to be modified
 G = [0; 0; m * g];
-l_1 = 0.17078793;%to be modified ï¿½Ü¸Ë±Û³ï¿½ï¿½ï¿½
+l_1 = 0.17078793;%to be modified ¸Ü¸Ë±Û³¤¶È
 l_2 = 0.06647954;%to be modified
-I_x = 0.0149;%0.011866%to be modified ×ªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+I_x = 0.0149;%0.011866%to be modified ×ª¶¯¹ßÁ¿
 I_y = 0.0149;%0.011866%to be modified
 I_z = 0.005516;%0.00492%to be modified
 % I_x = 0.011866;%to be modified
@@ -57,10 +57,10 @@ I = [I_x    0    0;
    
 d2r = pi / 180;
 r2d = 180 / pi;
-c_m = 40 * d2r;%20*d2r ï¿½ï¿½ï¿½ï¿½Þ·ï¿½
+c_m = 40 * d2r;%20*d2r ¶æµÄÏÞ·ù
 uMin = [-c_m; -c_m; -c_m; -c_m];
 uMax = [c_m; c_m; c_m; c_m];
-O2MX = 0.6755; %ï¿½ï¿½Î»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ output 2 Mx (1ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ó¦2ï¿½ï¿½ï¿½ï¿½ï¿½1ï¿½ï¿½ï¿½ï¿½)
+O2MX = 0.6755; %µ¥Î»»¡¶ÈÊä³ö²úÉúµÄÁ¦¾Ø output 2 Mx (1»¡¶ÈÊä³ö¶ÔÓ¦2¸ö¶æ¸÷1»¡¶È)
 O2MY = 0.6755;
 O2MZ = 0.4985;
 B = [ -0.5000,        0,    0.5000,        0;
@@ -72,7 +72,8 @@ B_pseudo =  [  -1.0000,   -0.0000,    1.0000;
                      0,    1.0000,    1.0000];
 alpha_filt_param.CNT = 1;
 alpha_filt_param.CCR = 40;
-%% ×´Ì¬ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê¼ï¿½ï¿½
+%% ×´Ì¬±äÁ¿³õÊ¼»¯
+
 run('RRT_Star_Connect.m');
 initial_yaw = atan2(path_Quasi_Uniform_BSpline(2,2) - path_Quasi_Uniform_BSpline(1,2), ...
     path_Quasi_Uniform_BSpline(2,1) - path_Quasi_Uniform_BSpline(1,1)) * r2d;
@@ -84,11 +85,11 @@ initial_yaw = atan2(path_Quasi_Uniform_BSpline(2,2) - path_Quasi_Uniform_BSpline
 % Bspline_path_len = Bspline_path_len * N / Bspline_path_len(end) / 100;
 N = size(path_Quasi_Uniform_BSpline, 1);
 
-% N = 1000; %ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Î»10msï¿½ï¿½N=1000ï¿½ï¿½Ê¾ï¿½ï¿½ï¿½ï¿½10s
-ts = 0.01; %ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö´ï¿½ï¿½Æµï¿½ï¿½
+% N = 1000; %·ÂÕæÊ±³¤£¬µ¥Î»10ms£¬N=1000±íÊ¾·ÂÕæ10s
+ts = 0.01; %¿ØÖÆÆ÷Ö´ÐÐÆµÂÊ
 time = zeros(N, 1);
 for i = 1:1:N
-    time(i) = i * ts; %10s Ê±ï¿½ï¿½ï¿½ï¿½Îª0.01
+    time(i) = i * ts; %10s Ê±¼ä¼ä¸ôÎª0.01
 end
 X = zeros(N, 1); Y = zeros(N, 1); Z = zeros(N, 1);
 V_bx = zeros(N, 1); V_by = zeros(N, 1); V_bz = zeros(N, 1);
@@ -101,57 +102,57 @@ F_y1 = zeros(N, 1); F_z1 = zeros(N, 1);
 F_m = zeros(N, 1); F_p = zeros(N, 1);
 VCI = zeros(N, 1);
 Rolld = zeros(N, 1); Pitchd = zeros(N, 1); Yawd = zeros(N, 1);
-%------------------------ï¿½ï¿½Ê¼ï¿½ï¿½×´Ì¬1-----------------------------------------
-%------------------------ï¿½ï¿½Ê¼ï¿½ï¿½×´Ì¬2----------------------------------------
+%------------------------³õÊ¼»¯×´Ì¬1-----------------------------------------
+%------------------------³õÊ¼»¯×´Ì¬2----------------------------------------
 % speed = 1225;
-speed = 1347; %ï¿½ï¿½Í£Ê±ï¿½ï¿½ï¿½ï¿½×ªï¿½ï¿½
+speed = 1347; %ÐüÍ£Ê±·çÉÈ×ªËÙ
 c1 = 5*d2r; c2 = 5*d2r; c3 = 5*d2r; c4 = 5*d2r;
-c1 = 0 * d2r; c2 = 0 * d2r; c3 = 0 * d2r; c4 = 0 * d2r; %ï¿½ï¿½Æ¬Æ«×ªï¿½ï¿½Ê¼Öµ
+c1 = 0 * d2r; c2 = 0 * d2r; c3 = 0 * d2r; c4 = 0 * d2r; %¶æÆ¬Æ«×ª³õÊ¼Öµ
 
 C1(1) = c1; C2(1) = c2; C3(1) = c3; C4(1) = c4;
 Rn2b = Rn2bf(15 * d2r, 0 * d2r, 0 * d2r);
 Rn2b = Rn2bf(0 * d2r, 0 * d2r, initial_yaw * d2r);
 Rb2nd = Rn2b';
 
-f = 0;%ï¿½ï¿½ï¿½ï¿½
-f_a = 0; %ï¿½ï¿½ï¿½ï¿½Ó¦ï¿½ï¿½ï¿½ï¿½
-omegaD = [0; 0; 0];  %ï¿½ï¿½ï¿½Ù¶ï¿½ï¿½ï¿½ï¿½ï¿½Öµ
-omegaFdb = [0; 0; 0];  %ï¿½ï¿½ï¿½Ù¶È·ï¿½ï¿½ï¿½Öµ
-omegaFdbLast = [0; 0; 0];  %ï¿½ï¿½Ò»Ê±ï¿½Ì½ï¿½ï¿½Ù¶È·ï¿½ï¿½ï¿½
+f = 0;%ÍÆÁ¦
+f_a = 0; %×ÔÊÊÓ¦ÍÆÁ¦
+omegaD = [0; 0; 0];  %½ÇËÙ¶ÈÆÚÍûÖµ
+omegaFdb = [0; 0; 0];  %½ÇËÙ¶È·´À¡Öµ
+omegaFdbLast = [0; 0; 0];  %ÉÏÒ»Ê±¿Ì½ÇËÙ¶È·´À¡
 
-alphaFilt = [0; 0; 0];  %ï¿½Ç¼ï¿½ï¿½Ù¶ï¿½ï¿½Ë²ï¿½Öµ
+alphaFilt = [0; 0; 0];  %½Ç¼ÓËÙ¶ÈÂË²¨Öµ
 if INDI == 0
-    alphaFiltValue = [40; 40; 30];  %ï¿½Ç¼ï¿½ï¿½Ù¶ï¿½ï¿½Ë²ï¿½ï¿½ï¿½ï¿½ï¿½
-    Filt_Output = [40; 40; 30];  %INDIï¿½ï¿½ï¿½ï¿½Ë²ï¿½ï¿½ï¿½ï¿½ï¿½
+    alphaFiltValue = [40; 40; 30];  %½Ç¼ÓËÙ¶ÈÂË²¨²ÎÊý
+    Filt_Output = [40; 40; 30];  %INDIÊä³öÂË²¨²ÎÊý
 else
-    alphaFiltValue = [40; 40; 30];  %ï¿½Ç¼ï¿½ï¿½Ù¶ï¿½ï¿½Ë²ï¿½ï¿½ï¿½ï¿½ï¿½
-    Filt_Output = [40; 40; 30];  %INDIï¿½ï¿½ï¿½ï¿½Ë²ï¿½ï¿½ï¿½ï¿½ï¿½
+    alphaFiltValue = [40; 40; 30];  %½Ç¼ÓËÙ¶ÈÂË²¨²ÎÊý
+    Filt_Output = [40; 40; 30];  %INDIÊä³öÂË²¨²ÎÊý
     A_fil = [10; 10; 10];
 end
-output_i = [0; 0; 0];  %INDIï¿½ï¿½ï¿½
+output_i = [0; 0; 0];  %INDIÊä³ö
 
 
-output_f = [0; 0; 0];  %ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
-output_0 = [0; 0; 0];  %ï¿½ï¿½ï¿½Ù¶È»ï¿½ï¿½ï¿½Ò»Ê±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ë²ï¿½Öµ
-output = [0; 0; 0];  %ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½/ï¿½ï¿½Æ¬ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+output_f = [0; 0; 0];  %·´À¡Êä³ö
+output_0 = [0; 0; 0];  %½ÇËÙ¶È»·ÉÏÒ»Ê±¿ÌÊä³öÂË²¨Öµ
+output = [0; 0; 0];  %¿ØÖÆÊä³ö/¶æÆ¬ÐéÄâÊäÈë
 
-pRef = [0; 0; -10];  %ï¿½ï¿½ï¿½ï¿½Î»ï¿½ï¿½/ï¿½Î¿ï¿½Î»ï¿½ï¿½
-pRef = [path_Quasi_Uniform_BSpline(1,1); path_Quasi_Uniform_BSpline(1,2); -10];  
-vD = [0; -3.7; 0];  %ï¿½ï¿½ï¿½ï¿½ï¿½Ù¶ï¿½
+pRef = [0; 0; -10];  %ÆÚÍûÎ»ÖÃ/²Î¿¼Î»ÖÃ
+pRef = [path_Quasi_Uniform_BSpline(1,1); path_Quasi_Uniform_BSpline(1,2); -10]; 
+vD = [0; -3.7; 0];  %ÆÚÍûËÙ¶È
 vD = [0; 0; 0]; 
-vRef = [0; 0; 0];  %ï¿½Î¿ï¿½ï¿½Ù¶ï¿½
-vRefLast = [0; 0; 0];  %ï¿½Î¿ï¿½ï¿½Ù¶ï¿½
-angRef = [0; 0; 0];  %ï¿½Î¿ï¿½ï¿½Ç¶ï¿½
-angVelRef = [0; 0; 0];  %ï¿½Î¿ï¿½ï¿½ï¿½ï¿½Ù¶ï¿½
+vRef = [0; 0; 0];  %²Î¿¼ËÙ¶È
+vRefLast = [0; 0; 0];  %²Î¿¼ËÙ¶È
+angRef = [0; 0; 0];  %²Î¿¼½Ç¶È
+angVelRef = [0; 0; 0];  %²Î¿¼½ÇËÙ¶È
 Afil = [0; 0; -g];
 Acc_sensor = [0; 0; -g];
 
-%ï¿½ï¿½Ê¼×´Ì¬ï¿½ï¿½ Î»ï¿½Ã¡ï¿½ï¿½Ù¶È¡ï¿½ï¿½ï¿½Ì¬ï¿½ï¿½ï¿½ï¿½ï¿½Ù¶ï¿½
+%³õÊ¼×´Ì¬Á¿ Î»ÖÃ¡¢ËÙ¶È¡¢×ËÌ¬¡¢½ÇËÙ¶È
 % Rb2n = Rn2b'; 
 x0(1:3) = pRef; 
 x0(4:6) = Rn2b * vD; 
-x0(7:12) = [15*d2r; 0*d2r; 0*d2r; 0; 0; 0]; %×´Ì¬ï¿½ï¿½Ê¼ï¿½ï¿½
-x0(7:12) = [0 * d2r; 0 * d2r; initial_yaw * d2r; 0; 0; 0];%×´Ì¬ï¿½ï¿½Ê¼ï¿½ï¿½
+x0(7:12) = [15*d2r; 0*d2r; 0*d2r; 0; 0; 0]; %×´Ì¬³õÊ¼»¯
+x0(7:12) = [0 * d2r; 0 * d2r; initial_yaw * d2r; 0; 0; 0];%×´Ì¬³õÊ¼»¯
 
 X(1) = x0(1);
 Y(1) = x0(2);
@@ -165,9 +166,9 @@ Yaw(1) = x0(9);
 p(1) = x0(10);
 q(1) = x0(11);
 r(1) = x0(12);
-%% ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê¼ï¿½ï¿½
-%-------------------------------ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½2------------------------------
-K_a2 = 0; %ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ïµï¿½ï¿½
+%% ¿ØÖÆÆ÷³õÊ¼»¯
+%-------------------------------³õÊ¼»¯¿ØÖÆÆ÷2------------------------------
+K_a2 = 0; %À­Á¦²¹³¥ÏµÊý
 pidRolRate = PID(0.3, 0, 0, 200);%Ki = 0.1%kd=0.5
 pidPitRate = PID(0.3, 0, 0, 200);%Ki = 0.1%kd=0.5
 pidYawRate = PID(0.18, 0, 0, 200);%ki = 1
@@ -200,22 +201,22 @@ end
 pidX = PID(0.5, 0, 0, pi);
 pidY = PID(0.5, 0, 0, pi);
 pidZ = PID(2.0, 0, 0, pi);
-%% ï¿½ï¿½ï¿½ï¿½Ñ­ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+%% ³ÌÐòÑ­»·ÔËÐÐ
 for i = 1:1:N  
 
-    tSpan = [0 ts]; %Runge-Kuttaï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ä£¬Ò²ï¿½ï¿½ï¿½ï¿½ï¿½Ö¸ï¿½Ê½ï¿½ï¿½ï¿½Î¼ï¿½matlabï¿½ï¿½ï¿½ï¿½ï¿½Äµï¿½https://ww2.mathworks.cn/help/matlab/ref/ode45.html?searchHighlight=ode45&s_tid=doc_srchtitle#bu3ugj4ï¿½ï¿½
-    %-----ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä½ï¿½Runge-Kuttaï¿½ï¿½ï¿½ï¿½ï¿½Ö¸ï¿½Ê½ï¿½ï¿½
-    %=====% Ò»ï¿½ï¿½[Ê±ï¿½Ìµï¿½, ×´Ì¬]=ode45(ï¿½ï¿½ï¿½Ø¶ï¿½ï¿½ï¿½Î¢ï¿½Ö·ï¿½ï¿½ï¿½, ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½, ï¿½ï¿½Ê¼×´Ì¬, [], ï¿½ï¿½ï¿½ï¿½)
-    %       ï¿½ï¿½[~, x]=ode45('plant', tSpan, x0, [], u);  %ï¿½Î¿ï¿½https://wenku.baidu.com/view/ca004bd226fff705cc170a20.html
-    %=====% ï¿½ï¿½ï¿½ï¿½[Ê±ï¿½Ìµï¿½, ×´Ì¬]=ode45(ï¿½ï¿½ï¿½Ø¶ï¿½ï¿½ï¿½Î¢ï¿½Ö·ï¿½ï¿½ï¿½, ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½, ï¿½ï¿½Ê¼×´Ì¬)
-    %       ï¿½ï¿½[~, x]=ode45('plant', tSpan, x0);  %ï¿½Î¿ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ò£¬½ï¿½ï¿½ï¿½ï¿½ë¶¨ï¿½ï¿½Îªglobalï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+    tSpan = [0 ts]; %Runge-KuttaÇó½âÇø¼ä£¬Ò²ÓÐÁ½ÖÖ¸ñÊ½£¬²Î¼ûmatlab°ïÖúÎÄµµhttps://ww2.mathworks.cn/help/matlab/ref/ode45.html?searchHighlight=ode45&s_tid=doc_srchtitle#bu3ugj4¡£
+    %-----´øÊäÈëËÄ½×Runge-Kutta£¬Á½ÖÖ¸ñÊ½£º
+    %=====% Ò»£º[Ê±¿Ìµã, ×´Ì¬]=ode45(±»¿Ø¶ÔÏóÎ¢·Ö·½³Ì, Çó½âÇø¼ä, ³õÊ¼×´Ì¬, [], ÊäÈë)
+    %       ¼´[~, x]=ode45('plant', tSpan, x0, [], u);  %²Î¿¼https://wenku.baidu.com/view/ca004bd226fff705cc170a20.html
+    %=====% ¶þ£º[Ê±¿Ìµã, ×´Ì¬]=ode45(±»¿Ø¶ÔÏóÎ¢·Ö·½³Ì, Çó½âÇø¼ä, ³õÊ¼×´Ì¬)
+    %       ¼´[~, x]=ode45('plant', tSpan, x0);  %²Î¿¼Íù½ì³ÌÐò£¬½«ÊäÈë¶¨ÒåÎªglobal±äÁ¿¡£
     sol = ode45(@ductedfanplant3, tSpan, x0); 
-%     x0 =[X(i);Y(i);Z(i);V_bx(i);V_by(i);V_bz(i);Roll(i);Pitch(i);Yaw(i);p(i);q(i);r(i)]; %×´Ì¬ï¿½ï¿½ï¿½ï¿½x(1),x(2)ï¿½ï¿½ï¿½ï¿½
+%     x0 =[X(i);Y(i);Z(i);V_bx(i);V_by(i);V_bz(i);Roll(i);Pitch(i);Yaw(i);p(i);q(i);r(i)]; %×´Ì¬±äÁ¿x(1),x(2)¸üÐÂ
     [x, xdot] = deval(sol, tSpan); 
     len = length(x);
-    x0 = x(:, 2);%ï¿½ï¿½ï¿½ï¿½Ïµ×´Ì¬
- %%   ï¿½ï¿½ï¿½Ø¶ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
- %------------------------ï¿½ï¿½ï¿½Ø¶ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½-----------------------------------
+    x0 = x(:, 2);%»úÌåÏµ×´Ì¬
+ %%   ±»¿Ø¶ÔÏóÊä³ö
+ %------------------------±»¿Ø¶ÔÏóÊä³ö-----------------------------------
     X(i) = x(1, 2);
     Y(i) = x(2, 2);
     Z(i) = x(3, 2);
@@ -244,10 +245,10 @@ for i = 1:1:N
     V_n(i, 1) = V_xh;
     V_n(i, 2) = V_yh;
     Acc_b(i, :) = (Rn2b * [xdot(4, 2); xdot(5, 2); xdot(6, 2)])';
-    pFdb = [X(i); Y(i); Z(i)];%Î»ï¿½ï¿½
-    vFdb = [V_n(i, 1); V_n(i, 2); V_n(i, 3)];%ï¿½Ù¶ï¿½
+    pFdb = [X(i); Y(i); Z(i)];%Î»ÖÃ
+    vFdb = [V_n(i, 1); V_n(i, 2); V_n(i, 3)];%ËÙ¶È
 
-    omegaFdb = [p(i); q(i); r(i)];%ï¿½ï¿½ï¿½Ù¶ï¿½
+    omegaFdb = [p(i); q(i); r(i)];%½ÇËÙ¶È
     
 %     A_x(i) = Acc_b(i, 1) + g * sin(Pitch(i)) + 4 * sin(2 * pi * 1 * i / 100);
 %     A_y(i) = Acc_b(i, 2) - g * cos(Pitch(i)) * sin(Roll(i));
@@ -263,16 +264,16 @@ for i = 1:1:N
     angVelRefLast = angVelRef;
     Rb2nd_last = Rb2nd;
 %     Od_last = omegaD;
-%% ï¿½ï¿½ï¿½Ó·ï¿½ï¿½ï¿½ï¿½Å¶ï¿½
-    % ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ù£ï¿½ï¿½ï¿½ï¿½ï¿½Æ½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Îª5 m/s
+%% Ìí¼Ó·çËÙÈÅ¶¯
+    % »ù±¾·çËÙ£¬¼ÙÉèÆ½¾ù·çËÙÎª5 m/s
     mean_wind_speed = 0;
-    % ï¿½ï¿½Æµï¿½ï¿½ï¿½Ò²ï¿½ï¿½ï¿½Ä£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ß¶ÈµÄ»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+    % µÍÆµÕýÏÒ²¨£¬Ä£Äâ´óÆø³ß¶ÈµÄ»ºÂý²¨¶¯
     low_freq_component = 0 * sin(2 * pi * 0.05 * i / 100);
-    % ï¿½ï¿½Æµï¿½ï¿½ï¿½Ò²ï¿½ï¿½ï¿½Ä£ï¿½ï¿½Ð¡ï¿½ß¶ï¿½ï¿½ï¿½ï¿½ï¿½
+    % ¸ßÆµÕýÏÒ²¨£¬Ä£ÄâÐ¡³ß¶ÈÍÄÁ÷
     high_freq_component = 0 * sin(2 * pi * 1 * i / 100);
-    % ï¿½ï¿½ï¿½ï¿½Ò»Ð©ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Å¶ï¿½
+    % Ìí¼ÓÒ»Ð©Ëæ»úÔëÉù£¬Ä£ÄâËæ»úÈÅ¶¯
     noise_component = 0 * randn(size(i / 100));
-    % ï¿½Ü·ï¿½ï¿½ï¿½
+    % ×Ü·çËÙ
     wind_speed = mean_wind_speed + low_freq_component + high_freq_component + noise_component;
     if i > 100 && i < 800
         D_x_n = wind_speed;
@@ -292,8 +293,8 @@ for i = 1:1:N
     D_x = D_b(1);
     D_y = D_b(2);
     D_z = D_b(3);
- %%   ï¿½â»·
-%--------------------------Î»ï¿½Ã»ï¿½------------------------------------*------------------------------------------------
+ %%   Íâ»·
+%--------------------------Î»ÖÃ»·------------------------------------*------------------------------------------------
 %   pRef = [3.5 * sin((i - 1) / 500 * 2 * pi - pi / 2) + 3.5; 
 %           3.5 * cos((i - 1) / 500 * 2 * pi - pi / 2);
 %                           -10                      ];%circle
@@ -310,54 +311,54 @@ for i = 1:1:N
 %     pRef = [0; 0; -10 - 5*i/2000];
 %     pRef = [0; 0; -10];
     pRef = [path_Quasi_Uniform_BSpline(i, 1); path_Quasi_Uniform_BSpline(i, 2); -10];
-    eP = pRef - pFdb;%Î»ï¿½ï¿½ï¿½ï¿½î£¨ï¿½ï¿½ï¿½ï¿½Î»ï¿½ï¿½-×´Ì¬Î»ï¿½Ã£ï¿½
+    eP = pRef - pFdb;%Î»ÖÃÎó²î£¨ÆÚÍûÎ»ÖÃ-×´Ì¬Î»ÖÃ£©
 %     eP = [0; 0; 0;];
     
     result1 = pidX.PID_Controller(eP(1), ts);
     result2 = pidY.PID_Controller(eP(2), ts);
     result3 = pidZ.PID_Controller(eP(3), ts);
 
-    vRef = (pRef - pRefLast) / ts;%ï¿½Î¿ï¿½ï¿½Ù¶ï¿½
+    vRef = (pRef - pRefLast) / ts;%²Î¿¼ËÙ¶È
 %     vRef = 0;
-    vConstrain = 5; % Ë®Æ½ï¿½Ù¶ï¿½ï¿½Þ·ï¿½
+    vConstrain = 5; % Ë®Æ½ËÙ¶ÈÏÞ·ù
     vOffset = [Constrain(result1.output, -vConstrain, vConstrain);
                Constrain(result2.output, -vConstrain, vConstrain);
-               Constrain(result3.output, -1, 1)]; %ï¿½Ù¶È²ï¿½ï¿½ï¿½
-    vD = vRef + vOffset; %ï¿½ï¿½ï¿½ï¿½ï¿½Ù¶ï¿½
+               Constrain(result3.output, -1, 1)]; %ËÙ¶È²¹³¥
+    vD = vRef + vOffset; %ÆÚÍûËÙ¶È
     vD_bx = vD(1) * cos(Yaw(i)) + vD(2) * sin(Yaw(i));
     vD_by = -vD(1) * sin(Yaw(i)) + vD(2) * cos(Yaw(i));
     vD(1) = vD_bx;
     vD(2) = vD_by;
     for j = 1:1:3
-        vD(j) = Constrain(vD(j), -5, 5); %ï¿½ï¿½ï¿½ï¿½ï¿½Ù¶ï¿½ï¿½Þ·ï¿½
+        vD(j) = Constrain(vD(j), -5, 5); %ÆÚÍûËÙ¶ÈÏÞ·ù
     end
 
-%     if i<50                  %ï¿½Ù¶ï¿½Ä£Ê½
+%     if i<50                  %ËÙ¶ÈÄ£Ê½
 %         vD(1) = 0;
 %     else
 %         vD(1) = 10;
 %     end   
-%--------------------------ï¿½Ù¶È»ï¿½------------------------------------*------------------------------------------------
-    accRef = (vRef - vRefLast) / ts; %ï¿½Î¿ï¿½ï¿½ï¿½ï¿½Ù¶ï¿½
+%--------------------------ËÙ¶È»·------------------------------------*------------------------------------------------
+    accRef = (vRef - vRefLast) / ts; %²Î¿¼¼ÓËÙ¶È
     accRef_bx = accRef(1) * cos(Yaw(i)) + accRef(2) * sin(Yaw(i));
     accRef_by = -accRef(1) * sin(Yaw(i)) + accRef(2) * cos(Yaw(i));
     accRef(1) = accRef_bx;
     accRef(2) = accRef_by;
 %     accRef = 0;
-    eV = vD - vFdb; %ï¿½Ù¶ï¿½ï¿½ï¿½ï¿½
+    eV = vD - vFdb; %ËÙ¶ÈÎó²î
     result1 = pidXRate.PID_Controller(eV(1), ts);
     result2 = pidYRate.PID_Controller(eV(2), ts);
     result3 = pidZRate.PID_Controller(eV(3), ts);
     accOffset = [Constrain(result1.output, -3.5, 3.5);
                  Constrain(result2.output, -3.5, 3.5);
-                 Constrain(result3.output, -g, g)];%ï¿½ï¿½ï¿½Ù¶È²ï¿½ï¿½ï¿½
-    accD = accRef + accOffset; %ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ù¶ï¿½
+                 Constrain(result3.output, -g, g)];%¼ÓËÙ¶È²¹³¥
+    accD = accRef + accOffset; %ÆÚÍû¼ÓËÙ¶È
     
     for j = 1:1:3
-        accD(j) = Constrain(accD(j), -5, 5);%ï¿½ï¿½ï¿½Ù¶ï¿½ï¿½ï¿½ï¿½ï¿½Öµï¿½Þ·ï¿½
+        accD(j) = Constrain(accD(j), -5, 5);%¼ÓËÙ¶ÈÆÚÍûÖµÏÞ·ù
     end
 
-    %---------------------------ï¿½â»·ï¿½ï¿½ï¿½ï¿½----------------------------------------------------------------------------------------------
+    %---------------------------Íâ»·¿ØÖÆ----------------------------------------------------------------------------------------------
 %     P = Pitch(i);
 %     Ya = Yaw(i);
 %     R = Roll(i);
@@ -388,16 +389,16 @@ end
     a_c3 = -A / A_f;
     a_c2 = cross(a_c3, x_c) / norm(cross(a_c3, x_c));
     a_c1 = cross(a_c2, a_c3);
-    Rb2n_f = [a_c1, a_c2, a_c3];%ï¿½ï¿½Ì¬ï¿½ï¿½×ªï¿½ï¿½ï¿½ï¿½
-    Pitchd(i) = asin(Constrain(-Rb2n_f(3, 1), -1, 1));%ï¿½ï¿½ï¿½ï¿½Pitch
-	Rolld(i) = atan2(Rb2n_f(3, 2), Rb2n_f(3, 3));%ï¿½ï¿½ï¿½ï¿½Roll
+    Rb2n_f = [a_c1, a_c2, a_c3];%×ËÌ¬Ðý×ª¾ØÕó
+    Pitchd(i) = asin(Constrain(-Rb2n_f(3, 1), -1, 1));%ÆÚÍûPitch
+	Rolld(i) = atan2(Rb2n_f(3, 2), Rb2n_f(3, 3));%ÆÚÍûRoll
     Rb2nd = Rb2n_f;
-    f_n = m * A_f;%ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
-    f_a_D = K_a2 * (A_z(i) + f_n / m);%ï¿½ï¿½ï¿½ï¿½Ó¦ï¿½ï¿½ï¿½ï¿½
-    f_a = f_a + f_a_D * ts;%ï¿½ï¿½ï¿½ï¿½Ó¦ï¿½ï¿½ï¿½ï¿½
-    f = f_n + f_a * m;%ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
- %%   ï¿½Ú»ï¿½
-    %--------------------------ï¿½ï¿½Ì¬ï¿½ï¿½------------------------------------
+    f_n = m * A_f;%±ê³ÆÊäÈëÀ­Á¦
+    f_a_D = K_a2 * (A_z(i) + f_n / m);%×ÔÊÊÓ¦²¹³¥
+    f_a = f_a + f_a_D * ts;%×ÔÊÊÓ¦ÊäÈë
+    f = f_n + f_a * m;%×ÜÊäÈë
+ %%   ÄÚ»·
+    %--------------------------×ËÌ¬»·------------------------------------
 %     Rolld(i)=20*sin(i/200*2*pi)*d2r;
 %     Rolld(i)=15*d2r;
 %     Rolld(i) = 0;
@@ -414,11 +415,11 @@ end
 %           3.5 * cos((i - 1) / 500 * 2 * pi - pi / 2);
 %                           -10                      ];%circle
 
-      AngleLimit = 30 * d2r; %ï¿½Ç¶ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Þ·ï¿½
+      AngleLimit = 30 * d2r; %½Ç¶ÈÊäÈëÏÞ·ù
       Rolld(i) = Constrain(Rolld(i), -AngleLimit, AngleLimit); 
       Pitchd(i) = Constrain(Pitchd(i), -AngleLimit, AngleLimit); 
 
-%     Rb2nd = Rn2bf(Rolld(i), Pitchd(i), Yawd(i)); %ï¿½ï¿½Ì¬ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+%     Rb2nd = Rn2bf(Rolld(i), Pitchd(i), Yawd(i)); %×ËÌ¬¼¸ºÎÎó²î
 %     Rb2nd = Rb2nd';
 %     Rb2n = Rn2bf(Roll(i), Pitch(i), Yaw(i));
 %     Rb2n = Rb2n';
@@ -427,7 +428,7 @@ end
     eAng(3) = modPI(eAng(3));
     Yaw(i) = modPI(Yaw(i));
     % 
-    % ï¿½ï¿½Ì¬ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+    % ×ËÌ¬ÏßÐÔÎó²î
     result1 = pidRol.PID_Controller(eAng(1) + 3*sin(i / 400)*d2r, ts);
     result2 = pidPit.PID_Controller(eAng(2) - 3*sin(i / 300)*d2r, ts);
     result3 = pidYaw.PID_Controller(eAng(3) - 4*cos(i / 500)*d2r, ts);
@@ -439,51 +440,51 @@ end
     result3 = pidYaw.PID_Controller(eAng(3), ts);
     angVelOffset = [result1.output;
                     result2.output;
-                    result3.output;];%ï¿½ï¿½Ì¬ï¿½ä»¯ï¿½Ê²ï¿½ï¿½ï¿½
-    angVelRef = 0;%ï¿½Î¿ï¿½ï¿½ï¿½Ì¬ï¿½ä»¯ï¿½ï¿½
-    angVelD = angVelRef + angVelOffset; %ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ì¬ï¿½ä»¯ï¿½ï¿½
+                    result3.output;];%×ËÌ¬±ä»¯ÂÊ²¹³¥
+    angVelRef = 0;%²Î¿¼×ËÌ¬±ä»¯ÂÊ
+    angVelD = angVelRef + angVelOffset; %ÆÚÍû×ËÌ¬±ä»¯ÂÊ
 %     for j = 1:1:3
-%         angVelD(j) = Constrain(angVelD(j), -5, 5);%ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ì¬ï¿½ä»¯ï¿½ï¿½ï¿½Þ·ï¿½
+%         angVelD(j) = Constrain(angVelD(j), -5, 5);%ÆÚÍû×ËÌ¬±ä»¯ÂÊÏÞ·ù
 %     end
-    w = [1                0                 -sin(Pitch(i));  %ï¿½ï¿½Ì¬ï¿½ä»¯ï¿½Êµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ù¶ï¿½
+    w = [1                0                 -sin(Pitch(i));  %×ËÌ¬±ä»¯ÂÊµ½»úÌå½ÇËÙ¶È
          0     cos(Roll(i))     sin(Roll(i))*cos(Pitch(i));
          0    -sin(Roll(i))    cos(Roll(i))*cos(Pitch(i))];
-    omegaD = w * angVelD; %ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ù¶ï¿½
+    omegaD = w * angVelD; %ÆÚÍû½ÇËÙ¶È
     
-    %--------------------------ï¿½ï¿½ï¿½Ù¶È»ï¿½------------------------------------
-    alphaRaw = (omegaFdb - omegaFdbLast) / ts; %ï¿½ï¿½ÖµÃµï¿½Ô­Ê¼ï¿½Ç¼ï¿½ï¿½Ù¶ï¿½
+    %--------------------------½ÇËÙ¶È»·------------------------------------
+    alphaRaw = (omegaFdb - omegaFdbLast) / ts; %²î·ÖµÃµ½Ô­Ê¼½Ç¼ÓËÙ¶È
     for j = 1:1:3
         alphaFilt(j) = (alphaFilt(j) * (alphaFiltValue(j) - 1) + alphaRaw(j)) / alphaFiltValue(j);
     end
 %     [alphaFilt, alpha_filt_param] = SlideFilt(alphaFilt, alphaRaw, 3, alpha_filt_param, 1);
     k_ve =  Constrain(-A_z(i) / g, 0.5, 1.5);
-    G_cv(1) = (O2MX / I_x) * k_ve; %ï¿½ï¿½ï¿½ï¿½Ð§ï¿½Ê¾ï¿½ï¿½ï¿½
+    G_cv(1) = (O2MX / I_x) * k_ve; %¿ØÖÆÐ§ÂÊ¾ØÕó
 	G_cv(2) = (O2MY / I_y) * k_ve;
 	G_cv(3) = (O2MZ / I_z) * k_ve;
     for j = 1:1:3
-		G_cv(j) = Constrain(G_cv(j), 10, 200);%ï¿½Þ·ï¿½Îªï¿½Ë·ï¿½Ö¹ï¿½ï¿½Îª0
+		G_cv(j) = Constrain(G_cv(j), 10, 200);%ÏÞ·ùÎªÁË·ÀÖ¹ÆäÎª0
 		output_i(j) = -alphaFilt(j) / G_cv(j) + output_0(j);
-		output_i(j) = Constrain(output_i(j), -c_m, c_m); %INDIï¿½ï¿½ï¿½
+		output_i(j) = Constrain(output_i(j), -c_m, c_m); %INDIÊä³ö
     end
-    eOmega = omegaD - omegaFdb;%ï¿½ï¿½ï¿½Ù¶ï¿½ï¿½ï¿½ï¿½
+    eOmega = omegaD - omegaFdb;%½ÇËÙ¶ÈÎó²î
     result1 = pidRolRate.PID_Controller(eOmega(1), ts);
     result2 = pidPitRate.PID_Controller(eOmega(2), ts);
     result3 = pidYawRate.PID_Controller(eOmega(3), ts);
     output_f = [result1.output;%/k_ve;
                 result2.output;%/k_ve;
-                result3.output;];%/k_ve]; %ï¿½Ç¼ï¿½ï¿½Ù¶È²ï¿½ï¿½ï¿½
+                result3.output;];%/k_ve]; %½Ç¼ÓËÙ¶È²¹³¥
     for j = 1:1:3
         output(j) = output_i(j) + output_f(j);
 %         output(j) = output_f(j);
         output(j) = Constrain(output(j), -c_m, c_m);
         output_0(j) = (output_0(j) * (Filt_Output(j) - 1) + output(j)) / Filt_Output(j);
     end
-%%   ï¿½ï¿½ï¿½ï¿½Í½ï¿½ï¿½ï¿½ï¿½ï¿½
+%%   ·ÖÅäºÍ½á¹ûÊä³ö
     %----------------------------------------------------------------------
 %      clc;
-     progress = i / N * 100 %ï¿½ï¿½Ê¾ï¿½ï¿½ï¿½ï¿½
-     speed = sqrt(f / k_T0); %ï¿½ï¿½×ªï¿½ï¿½
-    Vb = Rn2b * vFdb; % TODO ï¿½ï¿½ï¿½Çºï¿½ï¿½ï¿½
+     progress = i / N * 100 %±íÊ¾½ø¶È
+     speed = sqrt(f / k_T0); %½°×ªËÙ
+    Vb = Rn2b * vFdb; % TODO ¿¼ÂÇº½Ïò
     Vciv = -Vb(3) / 2 + sqrt(((Vb(3) / 2)^2) + T / (sd * den * S));
     pseudo = [ -2.9276,         0,    3.7606;
 				     0,   -2.9276,    3.7606;
@@ -497,7 +498,7 @@ end
     gyroopt = 0;
 
 %    c = two_dir_alloc_df4(B, output_i, output_f, uMin, uMax);%PCA
-     c = B_pseudo * output; %Î±ï¿½ï¿½
+     c = B_pseudo * output; %Î±Äæ
      c = c - gyroopt;
      c1 = c(1); c2 = c(2); c3 = c(3); c4 = c(4);
 
@@ -538,72 +539,72 @@ end
 
 end
 
-%% ï¿½ï¿½Í¼ï¿½ï¿½Ê¾
-% figure(1), %Î»ï¿½ï¿½
-% %plot(time, data(:, 4)/100, 'b');grid on;hold on;%ode45ï¿½ï¿½â£¬tï¿½ï¿½timeï¿½ï¿½Í¬
+%% ×÷Í¼ÏÔÊ¾
+% figure(1), %Î»ÖÃ
+% %plot(time, data(:, 4)/100, 'b');grid on;hold on;%ode45Çó½â£¬tºÍtimeÏàÍ¬
 % plot(time, X, 'k', time, Xd, 'r');grid on;hold on;
-% title('ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Î»ï¿½ï¿½X');xlabel('Ê±ï¿½ä£¨sï¿½ï¿½');ylabel('m')
+% title('±±¶«µØÎ»ÖÃX');xlabel('Ê±¼ä£¨s£©');ylabel('m')
 % figure(2), 
 % %plot(time, data(:, 5)/100, 'b');grid on;hold on;
 % plot(time, Y, 'k', time, Yd, 'r');grid on;hold on;
-% title('ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Î»ï¿½ï¿½Y');xlabel('Ê±ï¿½ä£¨sï¿½ï¿½');ylabel('m')
+% title('±±¶«µØÎ»ÖÃY');xlabel('Ê±¼ä£¨s£©');ylabel('m')
 % figure(3), 
 % %plot(time, data(:, 13)/100, 'b');grid on;hold on;
 % plot(time, Z, 'k', time, Zd, 'r');grid on;hold on;
-% title('ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Î»ï¿½ï¿½Z');xlabel('Ê±ï¿½ä£¨sï¿½ï¿½');ylabel('m')
-% figure(4), %ï¿½Ù¶ï¿½
-% %plot(time, data(:, 10)/100, 'b');grid on;hold on;%ode45ï¿½ï¿½â£¬tï¿½ï¿½timeï¿½ï¿½Í¬
+% title('±±¶«µØÎ»ÖÃZ');xlabel('Ê±¼ä£¨s£©');ylabel('m')
+% figure(4), %ËÙ¶È
+% %plot(time, data(:, 10)/100, 'b');grid on;hold on;%ode45Çó½â£¬tºÍtimeÏàÍ¬
 % plot(time, V_n(:, 1), 'k', time,  v_xd, 'r');grid on;hold on;
-% title('ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ù¶ï¿½Vx');xlabel('Ê±ï¿½ä£¨sï¿½ï¿½');ylabel('m/s')
+% title('±±¶«µØËÙ¶ÈVx');xlabel('Ê±¼ä£¨s£©');ylabel('m/s')
 % figure(5), 
 % %plot(time, data(:, 11)/100, 'b');grid on;hold on;
 % plot(time, V_n(:, 2), 'k', time,  v_yd, 'r');grid on;hold on;
-% title('ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ù¶ï¿½Vy');xlabel('Ê±ï¿½ä£¨sï¿½ï¿½');ylabel('m/s')
+% title('±±¶«µØËÙ¶ÈVy');xlabel('Ê±¼ä£¨s£©');ylabel('m/s')
 % figure(6), 
 % %plot(time, data(:, 14)/100, 'b');grid on;hold on;
 % plot(time, V_n(:, 3), 'k', time,  v_zd, 'r');grid on;hold on;
-% title('ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ù¶ï¿½Vz');xlabel('Ê±ï¿½ä£¨sï¿½ï¿½');ylabel('m/s')
+% title('±±¶«µØËÙ¶ÈVz');xlabel('Ê±¼ä£¨s£©');ylabel('m/s')
 % figure(7), 
 % plot(time, Roll*r2d, 'k', time, Rolld*r2d, 'r');grid on;hold on;
-% title('Å·ï¿½ï¿½ï¿½ï¿½Roll');xlabel('Ê±ï¿½ä£¨sï¿½ï¿½');ylabel('deg')
+% title('Å·À­½ÇRoll');xlabel('Ê±¼ä£¨s£©');ylabel('deg')
 % figure(8), 
 % plot(time, Pitch*r2d, 'k', time, Pitchd*r2d, 'r');grid on;hold on;
-% title('Å·ï¿½ï¿½ï¿½ï¿½Pitch');xlabel('Ê±ï¿½ä£¨sï¿½ï¿½');ylabel('deg')
+% title('Å·À­½ÇPitch');xlabel('Ê±¼ä£¨s£©');ylabel('deg')
 % figure(9), 
 % %plot(time, data(:, 27), 'b');grid on;hold on;
 % plot(time, Yaw*r2d, 'k', time, Yawd*r2d, 'r');grid on;hold on;
-% title('Å·ï¿½ï¿½ï¿½ï¿½Yaw');xlabel('Ê±ï¿½ä£¨sï¿½ï¿½');ylabel('deg')
+% title('Å·À­½ÇYaw');xlabel('Ê±¼ä£¨s£©');ylabel('deg')
 % 
 % figure(10), %pqr
 % plot(time, p*r2d, 'k',  time,  pd*r2d, 'r');grid on;hold on;
-% title('ï¿½ï¿½ï¿½Ù¶ï¿½p');xlabel('Ê±ï¿½ä£¨sï¿½ï¿½');ylabel('deg/s')
+% title('½ÇËÙ¶Èp');xlabel('Ê±¼ä£¨s£©');ylabel('deg/s')
 % figure(11), 
 % %plot(time, data(:, 16)*r2d./100, 'b');grid on;hold on;
 % plot(time, q*r2d, 'k', time,  qd*r2d, 'r');grid on;hold on;
-% title('ï¿½ï¿½ï¿½Ù¶ï¿½q');xlabel('Ê±ï¿½ä£¨sï¿½ï¿½');ylabel('deg/s')
+% title('½ÇËÙ¶Èq');xlabel('Ê±¼ä£¨s£©');ylabel('deg/s')
 % figure(12), 
 % %plot(time, data(:, 17)*r2d./100, 'b');grid on;hold on;
 % plot(time, r*r2d, 'k', time,  rd*r2d, 'r');grid on;hold on;
-% title('ï¿½ï¿½ï¿½Ù¶ï¿½r');xlabel('Ê±ï¿½ä£¨sï¿½ï¿½');ylabel('deg/s')
+% title('½ÇËÙ¶Èr');xlabel('Ê±¼ä£¨s£©');ylabel('deg/s')
 % figure
 % plot(time, M_exth1, 'k', time, M_ext1, 'r');grid on;hold on;
-% title('Mext1');xlabel('Ê±ï¿½ä£¨sï¿½ï¿½');ylabel('N.m')
+% title('Mext1');xlabel('Ê±¼ä£¨s£©');ylabel('N.m')
 % figure
 % plot(time, M_exth3, 'k', time, M_ext3, 'r');grid on;hold on;
-% title('Mext3');xlabel('Ê±ï¿½ä£¨sï¿½ï¿½');ylabel('N.m')
+% title('Mext3');xlabel('Ê±¼ä£¨s£©');ylabel('N.m')
 % figure
 % plot(time, T, 'k', time, T_n, 'r', time, T_f, 'b');grid on; hold on;
-% title('Thrust');xlabel('Ê±ï¿½ä£¨sï¿½ï¿½');ylabel('N.m')
+% title('Thrust');xlabel('Ê±¼ä£¨s£©');ylabel('N.m')
 
 % load('X1.mat');load('Y1.mat')
 % load('oldData.mat');
-%Î»ï¿½Ã¹ì¼£
+%Î»ÖÃ¹ì¼£
 
 fig1 = figure
 plot(Xd, Yd, 'k', 'linewidth', 1);grid on;hold on;
 plot(X, Y, '--', 'color', [0, 0.45, 0.74], 'linewidth', 1);hold on;
-% plot(X1, Y1, '-.', 'color', [0.85, 0.33, 0.1], 'LineWidth', 1);hold on;%'ï¿½ï¿½ï¿½Î¿ï¿½ï¿½ï¿½'
-% axis([-1 7 -4 5]);%ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê¾ï¿½ï¿½Î§ï¿½ï¿½Xï¿½ï¿½-1ï¿½ï¿½7ï¿½ï¿½Yï¿½ï¿½-4ï¿½ï¿½5ï¿½ï¿½
+% plot(X1, Y1, '-.', 'color', [0.85, 0.33, 0.1], 'LineWidth', 1);hold on;%'¼¸ºÎ¿ØÖÆ'
+% axis([-1 7 -4 5]);%ÉèÖÃ×ø±êÖáÏÔÊ¾·¶Î§£¨XÖá-1µ½7£»YÖá-4µ½5£©
 xlabel('Pos-X(m)');
 ylabel('Pos-Y(m)');
 h = legend('Ref', 'Real');%legend('boxoff');
@@ -611,7 +612,7 @@ set(h, 'NumColumns', 1, 'location', 'northeast');%northwest
 set(fig1.CurrentAxes,  'FontSize',  10, 'FontName', 'Times New Roman', 'LabelFontSizeMultiplier',  1, 'TitleFontSizeMultiplier', 1, 'LineWidth', 0.5, 'Xcolor', 'black', 'Ycolor', 'black', 'Zcolor', 'black')
 sgtitle('PosX-PosY');
 
-%Î»ï¿½ï¿½
+%Î»ÖÃ
 fig1 = figure
 subplot(3, 1, 1)
 plot(time, Xd, 'k', 'LineWidth', 1); grid on; hold on;
@@ -639,7 +640,7 @@ set(fig1.CurrentAxes, 'FontSize', 10, 'FontName', 'Times New Roman', 'LabelFontS
 sgtitle('Position-Times');
 
 
-% %ï¿½Ù¶ï¿½
+% %ËÙ¶È
 fig1 = figure
 subplot(3, 1, 1)
 plot(time, v_xd, 'k', 'LineWidth', 1);grid on;hold on;
@@ -664,7 +665,7 @@ set(h, 'NumColumns', 1, 'location', 'northwest');%northwest
 set(fig1.CurrentAxes, 'FontSize', 10, 'FontName', 'Times New Roman', 'LabelFontSizeMultiplier',  1, 'TitleFontSizeMultiplier', 1, 'LineWidth', 0.5, 'Xcolor', 'black', 'Ycolor', 'black', 'Zcolor', 'black')
 sgtitle('Velocity-Times');
 
-%ï¿½Ç¶ï¿½
+%½Ç¶È
 fig1 = figure
 subplot(3, 1, 1)
 plot(time, Rolld*r2d, 'k', 'LineWidth', 1);grid on;hold on;
@@ -690,7 +691,7 @@ set(fig1.CurrentAxes, 'FontSize', 10, 'FontName', 'Times New Roman', 'LabelFontS
 sgtitle('Attitude');
 
 
-% %ï¿½ï¿½×ªï¿½ï¿½ï¿½ï¿½
+% %Ðý×ª¾ØÕó
 % fig1 = figure
 % subplot(3, 3, 1)
 % plot(time,Rd11,'k','LineWidth',1);grid on;hold on;
@@ -751,7 +752,7 @@ sgtitle('Attitude');
 % set(fig1.CurrentAxes, 'FontSize', 10,'FontName','Times New Roman','LabelFontSizeMultiplier', 1,'TitleFontSizeMultiplier',1,'LineWidth',0.5,'Xcolor','black','Ycolor','black','Zcolor','black')
 % sgtitle('Rotation Matrix-Times');
 
-% ï¿½ï¿½ï¿½Ù¶ï¿½
+% ½ÇËÙ¶È
 % fig1 = figure
 % subplot(3,1,1)
 % plot(time,pd.*r2d,'k','LineWidth',1);grid on;hold on;
@@ -776,7 +777,7 @@ sgtitle('Attitude');
 % set(fig1.CurrentAxes, 'FontSize', 10,'FontName','Times New Roman','LabelFontSizeMultiplier', 1,'TitleFontSizeMultiplier',1,'LineWidth',0.5,'Xcolor','black','Ycolor','black','Zcolor','black')
 % sgtitle('Angular velocity-Times');
 
-% figure11 = figure    %Æ«ï¿½ï¿½
+% figure11 = figure    %Æ«½Ç
 % subplot(4,1,1);
 % plot(time, C1, 'b', 'LineWidth', 1);grid on;hold on;
 % ylabel('Vane1(deg)');axis([0 5 -40 40]);
@@ -795,7 +796,7 @@ sgtitle('Attitude');
 % set(figure11.CurrentAxes, 'FontSize', 10,'FontName','Times New Roman','LabelFontSizeMultiplier', 1,'TitleFontSizeMultiplier',1,'LineWidth',0.5,'Xcolor','black','Ycolor','black','Zcolor','black')
 % xlabel('Time(s)');
 % legend( 'Real', 'Virtual');
-% sgtitle('ï¿½ï¿½Æ¬Æ«×ªï¿½ï¿½');
+% sgtitle('¶æÆ¬Æ«×ª½Ç');
 
 % fig1 = figure
 % subplot(4,1,1)
@@ -830,17 +831,17 @@ sgtitle('Attitude');
 % set(fig1.CurrentAxes, 'FontSize', 10,'FontName','Times New Roman','LabelFontSizeMultiplier', 1,'TitleFontSizeMultiplier',1,'LineWidth',0.5,'Xcolor','black','Ycolor','black','Zcolor','black')
 
 function vFdb = vee(M)
-    % ï¿½ï¿½ï¿½ï¿½ï¿½Ô³Æ¾ï¿½ï¿½ï¿½Ó³ï¿½ï¿½Îªï¿½ï¿½ï¿½ï¿½
+    % ½«·´¶Ô³Æ¾ØÕóÓ³ÉäÎªÏòÁ¿
     vFdb = [M(3, 2); M(1, 3); M(2, 1)];
 end
 function M_hat = hat(omegaFdb)
-    % ï¿½ï¿½ï¿½ë£ºï¿½ï¿½Î¬ï¿½ï¿½ï¿½ï¿½ omegaFdb = [O1, O2, O3]
-    % ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ô³Æ¾ï¿½ï¿½ï¿½ M_hat
+    % ÊäÈë£ºÈýÎ¬ÏòÁ¿ omegaFdb = [O1, O2, O3]
+    % Êä³ö£º·´¶Ô³Æ¾ØÕó M_hat
 
-    % È·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Î¬ï¿½ï¿½ï¿½ï¿½
-    assert(length(omegaFdb) == 3, 'ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Î¬ï¿½ï¿½ï¿½ï¿½');
+    % È·±£ÊäÈëÊÇÈýÎ¬ÏòÁ¿
+    assert(length(omegaFdb) == 3, 'ÊäÈë±ØÐëÊÇÈýÎ¬ÏòÁ¿');
 
-    % ï¿½ï¿½ï¿½É·ï¿½ï¿½Ô³Æ¾ï¿½ï¿½ï¿½
+    % Éú³É·´¶Ô³Æ¾ØÕó
     M_hat = [0, -omegaFdb(3), omegaFdb(2);
              omegaFdb(3), 0, -omegaFdb(1);
              -omegaFdb(2), omegaFdb(1), 0];
