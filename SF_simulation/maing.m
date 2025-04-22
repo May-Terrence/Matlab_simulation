@@ -1,9 +1,13 @@
 %% 常量定义
 clc;
-clear all;
-close all;
+clear;
+% close all;
+% load('CRRT_Bspline_Data.mat');
 import PID.*
-INDI = 1;
+INDI = 0;
+rao = 0;
+currentFolder = fileparts(which(mfilename));
+addpath(genpath(currentFolder));
 %% 常量定义，针对9吋涵道模型
 %----------------------初始化常量------------------------------------------------
 global Fy Vci Ma Tz Tt
@@ -30,7 +34,7 @@ sd = 0.7;%涵道扩压比
 den = 1.225;%空气密度kg/m^3
 S = 0.040828138126052952;%风扇桨盘面积
 
-d_cs = 0.0149564 * 0.7 * 0.7; %用于计算舵面气动力和力矩（反扭距）
+d_cs = 0.0149564 * 0.7 * 0.7; %用于计算舵面气动力和力矩
 
 k_Ns = 0.0008593;%计算侧向力
 d_MS = 1.1334291042e-7;%风扇扭矩系数
@@ -72,20 +76,16 @@ B_pseudo =  [  -1.0000,   -0.0000,    1.0000;
                      0,    1.0000,    1.0000];
 alpha_filt_param.CNT = 1;
 alpha_filt_param.CCR = 40;
+initial_yaw = 0;
 %% 状态变量初始化
 
-run('RRT_Star_Connect.m');
-initial_yaw = atan2(path_Quasi_Uniform_BSpline(2,2) - path_Quasi_Uniform_BSpline(1,2), ...
-    path_Quasi_Uniform_BSpline(2,1) - path_Quasi_Uniform_BSpline(1,1)) * r2d;
-% data = data(1:1000, :);
-% N = length(data(:, 1));
-% Bspline_path_diff = diff(path_Quasi_Uniform_BSpline);
-% Bspline_path_len = cumsum(sqrt(Bspline_path_diff(:,1).^2 + Bspline_path_diff(:,2).^2));
-% N = round(Bspline_path_len(end)) * 100;
-% Bspline_path_len = Bspline_path_len * N / Bspline_path_len(end) / 100;
-N = size(path_Quasi_Uniform_BSpline, 1);
+% initial_yaw = atan2(Py1(2) - Py1(1), ...
+%     Px1(2) - Px1(1)) * r2d;
+
+% N = Time(end)*100+1;
 
 % N = 1000; %仿真时长，单位10ms，N=1000表示仿真10s
+N = 550;
 ts = 0.01; %控制器执行频率
 time = zeros(N, 1);
 for i = 1:1:N
@@ -110,7 +110,7 @@ c1 = 5*d2r; c2 = 5*d2r; c3 = 5*d2r; c4 = 5*d2r;
 c1 = 0 * d2r; c2 = 0 * d2r; c3 = 0 * d2r; c4 = 0 * d2r; %舵片偏转初始值
 
 C1(1) = c1; C2(1) = c2; C3(1) = c3; C4(1) = c4;
-Rn2b = Rn2bf(15 * d2r, 0 * d2r, 0 * d2r);
+% Rn2b = Rn2bf(15 * d2r, 0 * d2r, 0 * d2r);
 Rn2b = Rn2bf(0 * d2r, 0 * d2r, initial_yaw * d2r);
 Rb2nd = Rn2b';
 
@@ -137,8 +137,8 @@ output_0 = [0; 0; 0];  %角速度环上一时刻输出滤波值
 output = [0; 0; 0];  %控制输出/舵片虚拟输入
 
 pRef = [0; 0; -10];  %期望位置/参考位置
-pRef = [path_Quasi_Uniform_BSpline(1,1); path_Quasi_Uniform_BSpline(1,2); -10]; 
-vD = [0; -3.7; 0];  %期望速度
+% pRef = [Px1(1); Py1(1); -10]; 
+% vD = [0; -3.7; 0];  %期望速度
 vD = [0; 0; 0]; 
 vRef = [0; 0; 0];  %参考速度
 vRefLast = [0; 0; 0];  %参考速度
@@ -146,7 +146,7 @@ angRef = [0; 0; 0];  %参考角度
 angVelRef = [0; 0; 0];  %参考角速度
 Afil = [0; 0; -g];
 Acc_sensor = [0; 0; -g];
-
+noise = 0 * randn(N, 1);
 %初始状态量 位置、速度、姿态、角速度
 % Rb2n = Rn2b'; 
 x0(1:3) = pRef; 
@@ -169,28 +169,31 @@ r(1) = x0(12);
 %% 控制器初始化
 %-------------------------------初始化控制器2------------------------------
 K_a2 = 0; %拉力补偿系数
-pidRolRate = PID(0.3, 0, 0, 200);%Ki = 0.1%kd=0.5
-pidPitRate = PID(0.3, 0, 0, 200);%Ki = 0.1%kd=0.5
-pidYawRate = PID(0.18, 0, 0, 200);%ki = 1
 % pidRolRate = PID(0.5, 0, 0, 200);%Ki = 0.1%kd=0.5
 % pidPitRate = PID(0.5, 0, 0, 200);%Ki = 0.1%kd=0.5
-% pidYawRate = PID(0.5, 0, 0, 200);%ki = 1
+% pidYawRate = PID(0.18, 0, 0, 200);%ki = 1
+pidRolRate = PID(0.7, 1, 0, 200);%Ki = 0.1%kd=0.5
+pidPitRate = PID(0.7, 1, 0, 200);%Ki = 0.1%kd=0.5
+pidYawRate = PID(0.4, 0.3, 0, 200);%ki = 1
+% pidRolRate = PID(0.3, 0.6, 0, 200);
+% pidPitRate = PID(0.3, 0.6, 0, 200);
+% pidYawRate = PID(0.18,0.6, 0, 200);
 
-pidRol = PID(5.5, 0, 0, pi);
-pidPit = PID(5.5, 0, 0, pi);
-pidYaw = PID(5.0, 0.1, 0, pi);
-% pidRol = PID(7.0, 0, 1, pi);
-% pidPit = PID(7.0, 0, 1, pi);
+% pidRol = PID(5.5, 0, 0, pi);
+% pidPit = PID(5.5, 0, 0, pi);
 % pidYaw = PID(5.0, 0, 0, pi);
-if INDI == 1
-pidXRate = PID(1.5, 0, 0, pi);
-pidYRate = PID(1.5, 0, 0, pi);
-pidZRate = PID(2.0, 0.05, 0, 200);
-else
-pidXRate = PID(1.5, 1, 0, pi);
-pidYRate = PID(1.5, 1, 0, pi);
-pidZRate = PID(2.0, 0.05, 0, 200);
-end
+pidRol = PID(6.5, 0, 0, pi);
+pidPit = PID(6.5, 0, 0, pi);
+pidYaw = PID(6.0, 0, 0, pi);
+% if INDI == 1
+%     pidXRate = PID(1.5, 0, 0, pi);
+%     pidYRate = PID(1.5, 0, 0, pi);
+%     pidZRate = PID(2.0, 0.05, 0, 200);
+% else
+    pidXRate = PID(1.5, 0, 0, pi);
+    pidYRate = PID(1.5, 0, 0, pi);
+    pidZRate = PID(2.0, 0.05, 0, 200);
+% end
 % pidXRate = PID(4.0, 0, 0, pi);
 % pidYRate = PID(4.0, 0, 0, pi);
 % pidZRate = PID(5.0, 0.05, 0, 200);
@@ -198,6 +201,9 @@ end
 % pidYRate = PID(0.1, 0, 0, 200);
 % pidZRate = PID(2, 0, 0, 200);
 
+% pidX = PID(0.5, 0.25, 0, pi);
+% pidY = PID(0.5, 0.25, 0, pi);
+% pidZ = PID(2.0, 0, 0, pi);
 pidX = PID(0.5, 0, 0, pi);
 pidY = PID(0.5, 0, 0, pi);
 pidZ = PID(2.0, 0, 0, pi);
@@ -227,8 +233,8 @@ for i = 1:1:N
     Roll(i) = x(7, 2);
     Pitch(i) = x(8, 2);
     Yaw(i) = x(9, 2);
-    p(i) = x(10, 2);
-    q(i) = x(11, 2);
+    p(i) = x(10, 2)+noise(i);
+    q(i) = x(11, 2)+noise(i);
     r(i) = x(12, 2);
 % 	Roll_fil(i) = (Roll_fil(i) * (Filt_Output(1) - 1) + Roll(i)) / Filt_Output(1);
 %     Pitch_fil(i) = (Pitch_fil(i) * (Filt_Output(2) - 1) + Pitch(i)) / Filt_Output(2);
@@ -240,6 +246,7 @@ for i = 1:1:N
     Rn2b = Rn2bf(Roll(i), Pitch(i), Yaw(i));
     Rb2n = Rn2b';
     V_n(i, :) = (Rb2n * [V_bx(i); V_by(i); V_bz(i)])';
+    v_Fdb(i, :) = V_n(i, :);
 	V_xh =  V_n(i, 1) * cos(Yaw(i)) + V_n(i, 2) * sin(Yaw(i));
 	V_yh = -V_n(i, 1) * sin(Yaw(i)) + V_n(i, 2) * cos(Yaw(i));
     V_n(i, 1) = V_xh;
@@ -258,6 +265,9 @@ for i = 1:1:N
     A_y(i) = F_y / m;
     A_z(i) = F_z / m;
     Acc_sensor = [A_x(i), A_y(i), A_z(i)];
+
+    Acc_Fdb(1,i) = A_x(i)*cos(Yaw(i)) - A_y(i)*sin(Yaw(i));
+    Acc_Fdb(2,i) = A_x(i)*sin(Yaw(i)) + A_y(i)*cos(Yaw(i));
     pRefLast = pRef;
     vRefLast = vRef;
     angRefLast = angRef;
@@ -266,51 +276,52 @@ for i = 1:1:N
 %     Od_last = omegaD;
 %% 添加风速扰动
     % 基本风速，假设平均风速为5 m/s
-    mean_wind_speed = 0;
+    mean_wind_speed = 5;
     % 低频正弦波，模拟大气尺度的缓慢波动
-    low_freq_component = 0 * sin(2 * pi * 0.05 * i / 100);
+    low_freq_component = 1 * sin(2 * pi * 0.05 * i / 100);
     % 高频正弦波，模拟小尺度湍流
-    high_freq_component = 0 * sin(2 * pi * 1 * i / 100);
+    high_freq_component = 0.5 * sin(2 * pi * 1 * i / 100);
     % 添加一些随机噪声，模拟随机扰动
-    noise_component = 0 * randn(size(i / 100));
+    noise_component = 0.1 * randn(size(i / 100));
     % 总风速
     wind_speed = mean_wind_speed + low_freq_component + high_freq_component + noise_component;
-    if i > 100 && i < 800
-        D_x_n = wind_speed;
-        D_y_n = 0;
-        D_z_n = 0;
-    elseif i >= 800 && i < 1500
-        D_x_n = -wind_speed;
-        D_y_n = 0;
-        D_z_n = 0;
-    elseif i >= 1500
+    if i > 100 && i < 1000
         D_x_n = 0;
         D_y_n = 0;
         D_z_n = 0;
+    % elseif i >= 800 && i < 1500
+    %     D_x_n = -wind_speed;
+    %     D_y_n = 0;
+    %     D_z_n = 0;
+    % elseif i >= 1500
+    %     D_x_n = 0;
+    %     D_y_n = 0;
+    %     D_z_n = 0;
     end
 
     D_b= Rn2b * [D_x_n; D_y_n; D_z_n];
     D_x = D_b(1);
     D_y = D_b(2);
     D_z = D_b(3);
+    V_wind(i) = wind_speed;
  %%   外环
 %--------------------------位置环------------------------------------*------------------------------------------------
-%   pRef = [3.5 * sin((i - 1) / 500 * 2 * pi - pi / 2) + 3.5; 
-%           3.5 * cos((i - 1) / 500 * 2 * pi - pi / 2);
-%                           -10                      ];%circle
-%   pRef = [-3.5 * cos((i - 1) / N * 2 * pi) + 3.5
-%            3.5 * sin((i - 1) / N * 2 * pi)
-%                           -10               ];%circle
+  % pRef = [3.5 * sin((i - 1) / 500 * 2 * pi - pi / 2) + 3.5; 
+  %         3.5 * cos((i - 1) / 500 * 2 * pi - pi / 2);
+  %                         -10                      ];%circle
+  % pRef = [-3.5 * cos((i - 1) / N * 2 * pi) + 3.5
+  %          3.5 * sin((i - 1) / N * 2 * pi)
+  %                         -10               ];%circle
 %   pRef = [3 * sin((i - 1) / N * 3 * pi - pi / 2) + 3;
 %                 3 * sin((i - 1) / (N/2) * 2 * pi - pi);
 %                         -10];
 %     pRef = [i^2 / 100000; 0; -10];
 %     pRef = [0; i / 100; -10];
 %     pRef = [i^2 / 100000; i^2 / 100000; -10];
-%     pRef = [i / 100; 0; -10];
+    % pRef = [i / 100; 0; -10];
 %     pRef = [0; 0; -10 - 5*i/2000];
-%     pRef = [0; 0; -10];
-    pRef = [path_Quasi_Uniform_BSpline(i, 1); path_Quasi_Uniform_BSpline(i, 2); -10];
+    pRef = [0; 0; -10];
+    % pRef = [Px1(i); Py1(i); -10];
     eP = pRef - pFdb;%位置误差（期望位置-状态位置）
 %     eP = [0; 0; 0;];
     
@@ -319,14 +330,19 @@ for i = 1:1:N
     result3 = pidZ.PID_Controller(eP(3), ts);
 
     vRef = (pRef - pRefLast) / ts;%参考速度
-%     vRef = 0;
+    % vRef(1:2,:) = [Vx1(i), Vy1(i)];
+    v_Ref(:,i) = vRef;
+    % vRef = 0;
     vConstrain = 5; % 水平速度限幅
     vOffset = [Constrain(result1.output, -vConstrain, vConstrain);
                Constrain(result2.output, -vConstrain, vConstrain);
                Constrain(result3.output, -1, 1)]; %速度补偿
     vD = vRef + vOffset; %期望速度
+    vxReal(:,i) = vD(1);
+    vyReal(:,i) = vD(2);
     vD_bx = vD(1) * cos(Yaw(i)) + vD(2) * sin(Yaw(i));
     vD_by = -vD(1) * sin(Yaw(i)) + vD(2) * cos(Yaw(i));
+
     vD(1) = vD_bx;
     vD(2) = vD_by;
     for j = 1:1:3
@@ -340,11 +356,13 @@ for i = 1:1:N
 %     end   
 %--------------------------速度环------------------------------------*------------------------------------------------
     accRef = (vRef - vRefLast) / ts; %参考加速度
+    % accRef(1:2,:) = [Ax1(i), Ay1(i)];
+    accSet(:,i) = accRef;
     accRef_bx = accRef(1) * cos(Yaw(i)) + accRef(2) * sin(Yaw(i));
     accRef_by = -accRef(1) * sin(Yaw(i)) + accRef(2) * cos(Yaw(i));
     accRef(1) = accRef_bx;
     accRef(2) = accRef_by;
-%     accRef = 0;
+    % accRef = 0;
     eV = vD - vFdb; %速度误差
     result1 = pidXRate.PID_Controller(eV(1), ts);
     result2 = pidYRate.PID_Controller(eV(2), ts);
@@ -366,7 +384,7 @@ if INDI == 0
     accDisturb = [ cos(Pitch(i)) * Acc_sensor(1) + sin(Roll(i)) * sin(Pitch(i)) * Acc_sensor(2);
                      cos(Roll(i)) * Acc_sensor(2);
                     -sin(Pitch(i)) * Acc_sensor(1) + sin(Roll(i)) * cos(Pitch(i)) * Acc_sensor(2) + g];
-%     A = accD - [0;0;g];
+    % A = accD - [0;0;g];
     A = accD - accDisturb;
 else
     accDisturb = [ cos(Pitch(i)) * Acc_sensor(1) + sin(Roll(i)) * sin(Pitch(i)) * Acc_sensor(2) + cos(Roll(i)) * sin(Pitch(i)) * Acc_sensor(3);
@@ -382,7 +400,8 @@ else
 		Afil(j) = (Afil(j) * (A_fil(j) - 1) + A(j)) / A_fil(j);
     end
 end
-
+    accReal(1,i) = A(1)*cos(Yaw(i)) - A(2)*sin(Yaw(i));
+    accReal(2,i) = A(1)*sin(Yaw(i)) + A(2)*cos(Yaw(i));
     A_f = norm(A);
     x_c = [1; 0; 0];
 %     x_c = [cos(Yaw(i)); sin(Yaw(i)); 0];
@@ -401,16 +420,36 @@ end
     %--------------------------姿态环------------------------------------
 %     Rolld(i)=20*sin(i/200*2*pi)*d2r;
 %     Rolld(i)=15*d2r;
-%     Rolld(i) = 0;
+    % Rolld(i) = 0;
     Yawd(i) = 0 * d2r;
     Yawd(i) = atan2(pRef(2) - pRefLast(2), pRef(1) - pRefLast(1));
+    % if i == 1
+    %     Yawd(i) = atan2(Py1(2) - Py1(1), Px1(2) - Px1(1));
+    % end
 %     Yawd(i) = atan2(pRef(2) - pFdb(2), pRef(1) - pFdb(1));
-%     Pitchd(i) = 0;
-%     if i < 50
-%         Rolld(i) = 0 * d2r;
-%     else
-%         Rolld(i) = 20 * d2r;
-%     end
+    Pitchd(i) = 0;
+
+    if i < 100
+        Rolld(i) = 0 * d2r;
+    elseif i >= 100 && i < 250
+        rao = 1;
+        Rolld(i) = 8 * d2r;
+    elseif i >= 250 && i < 400
+        rao = 1;
+        Rolld(i) = -8 * d2r;
+    else
+        rao = 1;
+        Rolld(i) = 0 * d2r;
+    end
+
+    % if i < 100
+    %     rao = 0;
+    % elseif i >= 100 && i < 203
+    %     rao = 1;
+    % else 
+    %     rao = 0;
+    % end
+
 %    Rolld(i) = 1 * sin((i-1) / 500 * 2 * pi - pi / 2); 
 %           3.5 * cos((i - 1) / 500 * 2 * pi - pi / 2);
 %                           -10                      ];%circle
@@ -429,9 +468,9 @@ end
     Yaw(i) = modPI(Yaw(i));
     % 
     % 姿态线性误差
-    result1 = pidRol.PID_Controller(eAng(1) + 3*sin(i / 400)*d2r, ts);
-    result2 = pidPit.PID_Controller(eAng(2) - 3*sin(i / 300)*d2r, ts);
-    result3 = pidYaw.PID_Controller(eAng(3) - 4*cos(i / 500)*d2r, ts);
+    % result1 = pidRol.PID_Controller(eAng(1) + rand*d2r, ts);
+    % result2 = pidPit.PID_Controller(eAng(2) - rand*d2r, ts);
+    % result3 = pidYaw.PID_Controller(eAng(3) - rand*d2r, ts);
 %     result1 = pidRol.PID_Controller(eAng(1) + 5*d2r, ts);
 %     result2 = pidPit.PID_Controller(eAng(2) - 3*d2r, ts);
 %     result3 = pidYaw.PID_Controller(eAng(3) - 2*cos(i / 500)*d2r, ts);
@@ -462,7 +501,7 @@ end
 	G_cv(2) = (O2MY / I_y) * k_ve;
 	G_cv(3) = (O2MZ / I_z) * k_ve;
     for j = 1:1:3
-		G_cv(j) = Constrain(G_cv(j), 10, 200);%限幅为了防止其为0
+		G_cv(j) = 5*Constrain(G_cv(j), 10, 200);%限幅为了防止其为0
 		output_i(j) = -alphaFilt(j) / G_cv(j) + output_0(j);
 		output_i(j) = Constrain(output_i(j), -c_m, c_m); %INDI输出
     end
@@ -475,15 +514,18 @@ end
                 result3.output;];%/k_ve]; %角加速度补偿
     for j = 1:1:3
         output(j) = output_i(j) + output_f(j);
-%         output(j) = output_f(j);
+        % output(j) = output_f(j);
         output(j) = Constrain(output(j), -c_m, c_m);
         output_0(j) = (output_0(j) * (Filt_Output(j) - 1) + output(j)) / Filt_Output(j);
     end
+    INDI_i(:,i) = output_i;
+    INDI_f(:,i) = output_f;
 %%   分配和结果输出
     %----------------------------------------------------------------------
 %      clc;
      progress = i / N * 100 %表示进度
      speed = sqrt(f / k_T0); %桨转速
+     % speed = 1347;
     Vb = Rn2b * vFdb; % TODO 考虑航向
     Vciv = -Vb(3) / 2 + sqrt(((Vb(3) / 2)^2) + T / (sd * den * S));
     pseudo = [ -2.9276,         0,    3.7606;
@@ -494,14 +536,38 @@ end
      %    0     -l_1      0    l_1;
      %  l_2      l_2    l_2    l_2]); 
     pD_cs = 1 / (Vciv * Vciv * d_cs) * pseudo;
-%     gyroopt = pD_cs * I_prop * speed * [omegaFdb(2); -omegaFdb(1); 0];
-    gyroopt = 0;
+    gyroopt = pD_cs * I_prop * speed * [omegaFdb(2); -omegaFdb(1); 0];
+    % gyroopt = 0;
 
-%    c = two_dir_alloc_df4(B, output_i, output_f, uMin, uMax);%PCA
+     % c = two_dir_alloc_df4(B, output_i, output_f, uMin, uMax);%PCA
      c = B_pseudo * output; %伪逆
-     c = c - gyroopt;
+     c = c + gyroopt/3;
      c1 = c(1); c2 = c(2); c3 = c(3); c4 = c(4);
 
+     % if rao == 1
+     %     c1 = Constrain(c1, -30 * d2r, 30 * d2r);
+     %     c1 = c1+10*d2r;
+     % end
+     % if rao == 1
+     %     c1 = Constrain(c1, -15 * d2r, 15 * d2r);
+     %     c1 = c1+25*d2r;
+     %     c2 = Constrain(c2, -30 * d2r, 30 * d2r);
+     %     c2 = c2+10*d2r;
+     % end
+     c1 = Constrain(c1, -c_m, c_m);
+     c2 = Constrain(c2, -c_m, c_m);
+     c3 = Constrain(c3, -c_m, c_m);
+     c4 = Constrain(c4, -c_m, c_m);
+     e_inv(i,1:3) = output_f-B*[c1;c2;c3;c4];
+     delta_i = B_pseudo*output_i;
+     delta_f = B_pseudo*output_f;
+     for j=1:1:4
+         delta_i(j) = Constrain(delta_i(j), -40 * d2r, 40 * d2r);
+         delta_f(j) = Constrain(delta_f(j), -40 * d2r-delta_i(j), 40 * d2r-delta_i(j));
+         delta_f(j) = Constrain(delta_f(j), -40 * d2r, 40 * d2r);
+     end
+     e_i(i,1:3) = output_i - B*delta_i;
+     e_f(i,1:3) = output_f - B*delta_f;
      C1(i) = c1 * r2d;
      C2(i) = c2 * r2d;
      C3(i) = c3 * r2d;
@@ -600,70 +666,73 @@ end
 % load('oldData.mat');
 %位置轨迹
 
-fig1 = figure
-plot(Xd, Yd, 'k', 'linewidth', 1);grid on;hold on;
-plot(X, Y, '--', 'color', [0, 0.45, 0.74], 'linewidth', 1);hold on;
-% plot(X1, Y1, '-.', 'color', [0.85, 0.33, 0.1], 'LineWidth', 1);hold on;%'几何控制'
-% axis([-1 7 -4 5]);%设置坐标轴显示范围（X轴-1到7；Y轴-4到5）
-xlabel('Pos-X(m)');
-ylabel('Pos-Y(m)');
-h = legend('Ref', 'Real');%legend('boxoff');
-set(h, 'NumColumns', 1, 'location', 'northeast');%northwest
-set(fig1.CurrentAxes,  'FontSize',  10, 'FontName', 'Times New Roman', 'LabelFontSizeMultiplier',  1, 'TitleFontSizeMultiplier', 1, 'LineWidth', 0.5, 'Xcolor', 'black', 'Ycolor', 'black', 'Zcolor', 'black')
-sgtitle('PosX-PosY');
+% fig1 = figure
+% plot(Xd, Yd, 'k', 'linewidth', 1);grid on;hold on;
+% plot(X, Y, '--', 'color', [0, 0.45, 0.74], 'linewidth', 1);hold on;
+% % plot(X1, Y1, '-.', 'color', [0.85, 0.33, 0.1], 'LineWidth', 1);hold on;%'几何控制'
+% % axis([-1 7 -4 5]);%设置坐标轴显示范围（X轴-1到7；Y轴-4到5）
+% xlabel('Pos-X(m)');
+% ylabel('Pos-Y(m)');
+% h = legend('Ref', 'Real');%legend('boxoff');
+% set(h, 'NumColumns', 1, 'location', 'northeast');%northwest
+% set(fig1.CurrentAxes,  'FontSize',  10, 'FontName', 'Times New Roman', 'LabelFontSizeMultiplier',  1, 'TitleFontSizeMultiplier', 1, 'LineWidth', 0.5, 'Xcolor', 'black', 'Ycolor', 'black', 'Zcolor', 'black')
+% sgtitle('PosX-PosY');
+% % 
+% % %位置
+% fig1 = figure
+% subplot(3, 1, 1)
+% plot(time, Xd, 'k', 'LineWidth', 1); grid on; hold on;
+% plot(time, X, '--', 'color', [0, 0.45, 0.74], 'LineWidth', 1);
+% % axis([0 10 -1 7]);
+% ylabel('x(m)');
+% h = legend('Ref.', 'Real');
+% set(fig1.CurrentAxes, 'FontSize', 10, 'FontName', 'Times New Roman', 'LabelFontSizeMultiplier', 1, 'TitleFontSizeMultiplier', 1, 'LineWidth', 0.5, 'Xcolor', 'black', 'Ycolor', 'black', 'Zcolor', 'black')
+% subplot(3, 1, 2)
+% plot(time, Yd, 'k', 'LineWidth', 1);grid on;hold on;
+% plot(time, Y, '--', 'color', [0, 0.45, 0.74], 'LineWidth', 1);
+% % axis([0 10 -4 4]);
+% ylabel('y(m)');
+% h = legend('Ref.', 'Real');
+% set(fig1.CurrentAxes, 'FontSize', 10, 'FontName', 'Times New Roman', 'LabelFontSizeMultiplier',  1, 'TitleFontSizeMultiplier', 1, 'LineWidth', 0.5, 'Xcolor', 'black', 'Ycolor', 'black', 'Zcolor', 'black')
+% subplot(3, 1, 3)
+% plot(time, Zd, 'k', 'LineWidth', 1);grid on;hold on;
+% plot(time, Z, '--', 'color', [0, 0.45, 0.74], 'LineWidth', 1);
+% % axis([0 10 -10.2 -9.9]);
+% xlabel('t(s)');
+% ylabel('z(m)');
+% h = legend('Ref.', 'Real');%legend('boxoff');
+% set(h, 'NumColumns', 2, 'location', 'northwest');%northwest
+% set(fig1.CurrentAxes, 'FontSize', 10, 'FontName', 'Times New Roman', 'LabelFontSizeMultiplier',  1, 'TitleFontSizeMultiplier', 1, 'LineWidth', 0.5, 'Xcolor', 'black', 'Ycolor', 'black', 'Zcolor', 'black')
+% sgtitle('Position-Times');
+% 
+% save('D:\Flycontrol\MATLAB\plot\第四章实验\sim_INDI抗风.mat','Xd','X','Yd','Y','Zd','Z','v_xd','V_n','v_yd','v_zd','time')
+% save('sim_CRRT_Bspline_fly_V1.1.mat','Xd','X','Yd','Y','vxReal','v_Fdb','vyReal','time', ...
+%     'Acc_Fdb','accReal','v_Ref','accSet','Yaw','Rolld','Roll','Pitchd','Pitch','Yawd','Yaw')
 
-%位置
-fig1 = figure
-subplot(3, 1, 1)
-plot(time, Xd, 'k', 'LineWidth', 1); grid on; hold on;
-plot(time, X, '--', 'color', [0, 0.45, 0.74], 'LineWidth', 1);
-% axis([0 10 -1 7]);
-ylabel('x(m)');
-h = legend('Ref.', 'Real');
-set(fig1.CurrentAxes, 'FontSize', 10, 'FontName', 'Times New Roman', 'LabelFontSizeMultiplier', 1, 'TitleFontSizeMultiplier', 1, 'LineWidth', 0.5, 'Xcolor', 'black', 'Ycolor', 'black', 'Zcolor', 'black')
-subplot(3, 1, 2)
-plot(time, Yd, 'k', 'LineWidth', 1);grid on;hold on;
-plot(time, Y, '--', 'color', [0, 0.45, 0.74], 'LineWidth', 1);
-% axis([0 10 -4 4]);
-ylabel('y(m)');
-h = legend('Ref.', 'Real');
-set(fig1.CurrentAxes, 'FontSize', 10, 'FontName', 'Times New Roman', 'LabelFontSizeMultiplier',  1, 'TitleFontSizeMultiplier', 1, 'LineWidth', 0.5, 'Xcolor', 'black', 'Ycolor', 'black', 'Zcolor', 'black')
-subplot(3, 1, 3)
-plot(time, Zd, 'k', 'LineWidth', 1);grid on;hold on;
-plot(time, Z, '--', 'color', [0, 0.45, 0.74], 'LineWidth', 1);
-% axis([0 10 -10.2 -9.9]);
-xlabel('t(s)');
-ylabel('z(m)');
-h = legend('Ref.', 'Real');%legend('boxoff');
-set(h, 'NumColumns', 2, 'location', 'northwest');%northwest
-set(fig1.CurrentAxes, 'FontSize', 10, 'FontName', 'Times New Roman', 'LabelFontSizeMultiplier',  1, 'TitleFontSizeMultiplier', 1, 'LineWidth', 0.5, 'Xcolor', 'black', 'Ycolor', 'black', 'Zcolor', 'black')
-sgtitle('Position-Times');
-
-
-% %速度
-fig1 = figure
-subplot(3, 1, 1)
-plot(time, v_xd, 'k', 'LineWidth', 1);grid on;hold on;
-plot(time, V_n(:, 1), '--', 'color', [0, 0.45, 0.74], 'LineWidth', 1);
-% axis([0 10 -3 3]);
-ylabel('v_x(m/s)');
-set(fig1.CurrentAxes, 'FontSize', 10,'FontName', 'Times New Roman', 'LabelFontSizeMultiplier',  1, 'TitleFontSizeMultiplier', 1, 'LineWidth', 0.5, 'Xcolor', 'black', 'Ycolor', 'black', 'Zcolor', 'black')
-subplot(3, 1, 2)
-plot(time, v_yd, 'k', 'LineWidth', 1);grid on;hold on;
-plot(time, V_n(:, 2), '--', 'color', [0, 0.45, 0.74], 'LineWidth', 1);
-% axis([0 10 -5 5]);
-ylabel('v_y(m/s)');
-set(fig1.CurrentAxes, 'FontSize', 10, 'FontName', 'Times New Roman', 'LabelFontSizeMultiplier',  1, 'TitleFontSizeMultiplier', 1, 'LineWidth', 0.5, 'Xcolor', 'black', 'Ycolor', 'black', 'Zcolor', 'black')
-subplot(3, 1, 3)
-plot(time, v_zd, 'k', 'LineWidth', 1);grid on;hold on;
-plot(time, V_n(:, 3), '--', 'color', [0, 0.45, 0.74], 'LineWidth', 1);
-% axis([0 10 -0.1 0.1]);
-xlabel('t(s)');
-ylabel('v_z(m/s)');
-h = legend('Ref.', 'Real');%legend('boxoff');
-set(h, 'NumColumns', 1, 'location', 'northwest');%northwest
-set(fig1.CurrentAxes, 'FontSize', 10, 'FontName', 'Times New Roman', 'LabelFontSizeMultiplier',  1, 'TitleFontSizeMultiplier', 1, 'LineWidth', 0.5, 'Xcolor', 'black', 'Ycolor', 'black', 'Zcolor', 'black')
-sgtitle('Velocity-Times');
+% % %速度
+% fig1 = figure
+% subplot(3, 1, 1)
+% plot(time, v_xd, 'k', 'LineWidth', 1);grid on;hold on;
+% plot(time, V_n(:, 1), '--', 'color', [0, 0.45, 0.74], 'LineWidth', 1);
+% % axis([0 10 -3 3]);
+% ylabel('v_x(m/s)');
+% set(fig1.CurrentAxes, 'FontSize', 10,'FontName', 'Times New Roman', 'LabelFontSizeMultiplier',  1, 'TitleFontSizeMultiplier', 1, 'LineWidth', 0.5, 'Xcolor', 'black', 'Ycolor', 'black', 'Zcolor', 'black')
+% subplot(3, 1, 2)
+% plot(time, v_yd, 'k', 'LineWidth', 1);grid on;hold on;
+% plot(time, V_n(:, 2), '--', 'color', [0, 0.45, 0.74], 'LineWidth', 1);
+% % axis([0 10 -5 5]);
+% ylabel('v_y(m/s)');
+% set(fig1.CurrentAxes, 'FontSize', 10, 'FontName', 'Times New Roman', 'LabelFontSizeMultiplier',  1, 'TitleFontSizeMultiplier', 1, 'LineWidth', 0.5, 'Xcolor', 'black', 'Ycolor', 'black', 'Zcolor', 'black')
+% subplot(3, 1, 3)
+% plot(time, v_zd, 'k', 'LineWidth', 1);grid on;hold on;
+% plot(time, V_n(:, 3), '--', 'color', [0, 0.45, 0.74], 'LineWidth', 1);
+% % axis([0 10 -0.1 0.1]);
+% xlabel('t(s)');
+% ylabel('v_z(m/s)');
+% h = legend('Ref.', 'Real');%legend('boxoff');
+% set(h, 'NumColumns', 1, 'location', 'northwest');%northwest
+% set(fig1.CurrentAxes, 'FontSize', 10, 'FontName', 'Times New Roman', 'LabelFontSizeMultiplier',  1, 'TitleFontSizeMultiplier', 1, 'LineWidth', 0.5, 'Xcolor', 'black', 'Ycolor', 'black', 'Zcolor', 'black')
+% sgtitle('Velocity-Times');
 
 %角度
 fig1 = figure
@@ -690,6 +759,30 @@ set(h, 'NumColumns', 1, 'location', 'northwest');%northwest
 set(fig1.CurrentAxes, 'FontSize', 10, 'FontName', 'Times New Roman', 'LabelFontSizeMultiplier',  1, 'TitleFontSizeMultiplier', 1, 'LineWidth', 0.5, 'Xcolor', 'black', 'Ycolor', 'black', 'Zcolor', 'black')
 sgtitle('Attitude');
 
+%分配误差
+% fig1 = figure
+% subplot(3, 1, 1)
+% plot(time, e_inv(:,1)*r2d, 'k', 'LineWidth', 1);grid on;hold on;
+% plot(time, e_f(:,1)*r2d, '--', 'color', [0, 0.45, 0.74], 'LineWidth', 1);
+% % axis([0 5 -15 15]);
+% ylabel('Roll(deg)');
+% set(fig1.CurrentAxes, 'FontSize', 10, 'FontName', 'Times New Roman', 'LabelFontSizeMultiplier',  1, 'TitleFontSizeMultiplier', 1, 'LineWidth', 0.5, 'Xcolor', 'black', 'Ycolor', 'black', 'Zcolor', 'black')
+% subplot(3, 1, 2)
+% plot(time, e_inv(:,2)*r2d, 'k', 'LineWidth', 1);grid on;hold on;
+% plot(time, e_f(:,2)*r2d, '--', 'color', [0, 0.45, 0.74], 'LineWidth', 1);
+% % axis([0 5 -15 15]);
+% ylabel('Pitch(deg)');
+% set(fig1.CurrentAxes, 'FontSize', 10, 'FontName', 'Times New Roman', 'LabelFontSizeMultiplier',  1, 'TitleFontSizeMultiplier', 1, 'LineWidth', 0.5, 'Xcolor', 'black', 'Ycolor', 'black', 'Zcolor', 'black')
+% subplot(3, 1, 3)
+% plot(time, e_inv(:,3)*r2d, 'k', 'LineWidth', 1);grid on;hold on;
+% plot(time, e_f(:,3)*r2d, '--', 'color', [0, 0.45, 0.74], 'LineWidth', 1);
+% % axis([0 5 -15 15]);
+% xlabel('t(s)');
+% ylabel('Yaw(deg)');
+% h = legend('Ref.', 'Real');%legend('boxoff');
+% set(h, 'NumColumns', 1, 'location', 'northwest');%northwest
+% set(fig1.CurrentAxes, 'FontSize', 10, 'FontName', 'Times New Roman', 'LabelFontSizeMultiplier',  1, 'TitleFontSizeMultiplier', 1, 'LineWidth', 0.5, 'Xcolor', 'black', 'Ycolor', 'black', 'Zcolor', 'black')
+% sgtitle('分配误差');
 
 % %旋转矩阵
 % fig1 = figure

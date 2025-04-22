@@ -2,7 +2,7 @@ function [u]=two_dir_alloc_df4(B,v_T, v_D,umin,umax)
 % (c) mengchaoheng
 % Last edited 2019-11
 v=v_T+v_D;
-v = [0;0;1];
+% v = [0;0;1];
 [uv,z_uv,~]  = allocator_dir_LPwrap_4(B,v,umin,umax); % wls_alloc_mch(v,u);% 先计算合力矩所需舵量
 if(z_uv>=1) % 若舵量可以满足则直接满足
     u=uv;

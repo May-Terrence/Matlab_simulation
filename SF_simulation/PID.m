@@ -29,13 +29,14 @@ classdef PID < handle
         function result = PID_Controller(obj, err, Dt)
             obj.lastError = obj.error;
             obj.error = err;
-            if((obj.lastError>0 && obj.error<0) || (obj.lastError<0 && obj.error>0))
-                obj.ErrDefTmp = zeros(1, obj.ERRDEF_SLOPE_NUM);
-            end
+            % if((obj.lastError>0 && obj.error<0) || (obj.lastError<0 && obj.error>0))
+            %     obj.ErrDefTmp = zeros(1, obj.ERRDEF_SLOPE_NUM);
+            % end
             obj.pout = obj.error * obj.Kp;
             obj.integral = obj.integral + obj.error * Dt;
             obj.iout = fConstrain(obj.integral * obj.Ki, -obj.iLimit, obj.iLimit);
-            obj.dout = (obj.error - obj.lastError) / Dt;
+            obj.dout = (obj.error - obj.lastError)* obj.Kd / Dt;
+
             for i = 2:obj.ERRDEF_SLOPE_NUM
                 obj.ErrDefTmp(i-1) = obj.ErrDefTmp(i);
             end
@@ -43,14 +44,15 @@ classdef PID < handle
             ab = polyfit(1:obj.ERRDEF_SLOPE_NUM, obj.ErrDefTmp, 1);
             obj.dout2 = ab(1) / Dt;
             obj.dout3 = obj.dout2 * obj.Kd;
-            if (obj.pout > 0 && obj.dout3 < 0) || (obj.pout < 0 && obj.dout3 > 0)
-                obj.dout3 = 0;
-            end
+
+            % if (obj.pout > 0 && obj.dout3 < 0) || (obj.pout < 0 && obj.dout3 > 0)
+            %     obj.dout3 = 0;
+            % end
 %             obj.dout3 = obj.dout * obj.Kd;
 %             if (obj.pout > 0 && obj.dout < 0) || (obj.pout < 0 && obj.dout > 0)
 %                 obj.dout3 = 0;
 %             end
-            obj.output = obj.pout + obj.iout + obj.dout3;
+            obj.output = obj.pout + obj.iout + obj.dout;
             result.output = obj.output;
             result.pout = obj.pout;
             result.iout = obj.iout;

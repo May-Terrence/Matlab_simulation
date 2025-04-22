@@ -3,11 +3,11 @@
 % clear
 % close all
 tic
-global path_len pathNode_size sampleNode_size time path_opt path_Quasi_Uniform_BSpline
+global path_len pathNode_size sampleNode_size time path_opt path_Quasi_Uniform_BSpline sum_ang
 %% 地图构建
-map_size = [50, 30];
-startPos = [2,2];
-goalPos = [49,26];
+map_size = [70, 50];
+startPos = [3,3];
+goalPos = [67,46];
 map = fun_defMap; % 定义地图
 stepLength = 2;            % 步长
 rou = 5;                   % 圆形区域半径
@@ -85,9 +85,9 @@ while Final == false
             % 更新圆内的其他最近邻节点，判断经过x_new到达此邻接点路径是否更优
             for i = 1:length(idx_nearest)
                 idx = idx_nearest(i);
-                collision_flag = collision_check(map,treeNodes1(idx).node,x_new);
+                % collision_flag = collision_check(map,treeNodes1(idx).node,x_new);
                 dist_temp = norm(treeNodes1(idx).node - x_new);
-                if collision_flag == 1 && dist_min + dist_temp < treeNodes1(idx).dist
+                if dist_min + dist_temp < treeNodes1(idx).dist
                     treeNodes1(idx).parentNode = x_new;
                     treeNodes1(idx).dist = dist_min + dist_temp;
                 end
@@ -102,14 +102,14 @@ while Final == false
         [dist_min,idx_min] = min(dist);
         x_nearest_temp = treeNodes2(idx_min).node;
         % 判断树1的x_new与树2的x_nearest_temp连线是否满足碰撞检测
-        collision_flag = collision_check(map,x_nearest_temp,x_new);  
-        
-        if dist_min < stepLength * 2 && collision_flag == 1
-            idx1_break = nodeNum1;
-            idx2_break = idx_min;
-            Final = true;
-%             break
-        else
+%         collision_flag = collision_check(map,x_nearest_temp,x_new);  
+% 
+%         if dist_min < stepLength * 2 && collision_flag == 1
+%             idx1_break = nodeNum1;
+%             idx2_break = idx_min;
+%             Final = true;
+% %             break
+%         else
             % treeNodes2(idx_min)节点朝x_new方向生长
             direction = x_new - x_nearest_temp;
             unitDirection = direction / norm(direction);
@@ -132,7 +132,7 @@ while Final == false
                             idx_nearest(end+1,:) = i;
                         end
                     end
-            
+
                     % 判断圆形区域内哪一个节点到源节点的距离更近
                     if ~isempty(idx_nearest)
                         dist = [];
@@ -143,13 +143,13 @@ while Final == false
                         [dist_min,idx_min] = min(dist);
                         treeNodes2(nodeNum2).parentNode = treeNodes2(idx_nearest(idx_min)).node;
                         treeNodes2(nodeNum2).dist = dist_min;
-                        
+
                         % 更新圆内的其他最近邻节点，判断经过x_new_temp到达此邻接点路径是否更优
                         for i = 1:length(idx_nearest)
                             idx = idx_nearest(i);
-                            collision_flag = collision_check(map,treeNodes2(idx).node,x_new_temp);
+                            % collision_flag = collision_check(map,treeNodes2(idx).node,x_new_temp);
                             dist_temp = norm(treeNodes2(idx).node - x_new_temp);
-                            if collision_flag == 1 && dist_min + dist_temp < treeNodes2(idx).dist
+                            if dist_min + dist_temp < treeNodes2(idx).dist
                                 treeNodes2(idx).parentNode = x_new_temp;
                                 treeNodes2(idx).dist = dist_min + dist_temp;
                             end
@@ -165,7 +165,7 @@ while Final == false
                     x_nearest_temp = treeNodes1(idx_min_tr1).node;
                     % 判断树2的x_new_temp与树1的x_nearest_temp连线是否满足碰撞检测
                     collision_flag = collision_check(map,x_nearest_temp,x_new_temp);  
-                    
+
                     if dist_min < stepLength * 2 && collision_flag == 1
                         idx1_break = idx_min_tr1;
                         idx2_break = nodeNum2;
@@ -190,7 +190,7 @@ while Final == false
                     break;
                 end
             end
-        end
+        % end
     end
 end
 
@@ -224,14 +224,32 @@ end
 if path_opt(end) ~= goalPos
     path_opt = path_opt(end:-1:1,:); % 反转
 end
+
 % 路径长度
-path_diff = diff(path_opt);
-path_len = sum(sqrt(path_diff(:,1).^2 + path_diff(:,2).^2))
-pathNode_size = size(path_opt, 1);
+% pathNode_size = size(path_opt, 1);
 sampleNode_size = size(treeNodes2, 2) + size(treeNodes1, 2);
+path_opt = pathSmoothing(path_opt,map);
+    i = 1; % 当前检测点索引
+    angle = zeros(size(path_opt, 1)-2,1);
+    while i <= size(path_opt, 1)-2
+        % 获取连续三个路径点
+        p1 = path_opt(i, :);
+        p2 = path_opt(i+1, :);
+        p3 = path_opt(i+2, :);
+        
+        % 计算路径转折角度
+        vec1 = p2 - p1;   % 前向向量
+        vec2 = p3 - p2;   % 后向向量
+        cos_theta = dot(vec1, vec2)/(norm(vec1)*norm(vec2));
+        angle(i) = acos(min(max(cos_theta,-1),1)); % 数值安全处理
+        i = i + 1;
+    end
+sum_ang = sum(angle);
+path_diff = diff(path_opt);
+path_len = sum(sqrt(path_diff(:,1).^2 + path_diff(:,2).^2));
 time = toc;
-run('Bspline.m');
-path_Quasi_Uniform_BSpline(end+1,:) = goalPos;
+% run('Bspline.m');
+% path_Quasi_Uniform_BSpline(end+1,:) = goalPos;
 %% 画图
-plotRrtStarConnect(map_size,startPos, goalPos, map, treeNodes1,treeNodes2,path_opt)
-plot(path_Quasi_Uniform_BSpline(:,1),path_Quasi_Uniform_BSpline(:,2),'k','linewidth',1)
+% plotRrtStarConnect(map_size,startPos, goalPos, map, treeNodes1,treeNodes2,path_opt)
+% plot(path_Quasi_Uniform_BSpline(:,1),path_Quasi_Uniform_BSpline(:,2),'k','linewidth',1)

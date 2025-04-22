@@ -1,15 +1,15 @@
 % RRT算法
 % clc
 % clear
-close all
+% close all
 tic % 开始计时
 
-global len pathNode sampleNode time 
+global path_len pathNode_size sampleNode_size time sum_ang
 %% 地图构建
-map_size = [50, 30];
-startPos = [2,2];
-goalPos = [49,26];
-map = fun_defMap; % 定义地图，包括障碍物
+map_size = [70, 50];
+startPos = [3,3];
+goalPos = [67,46];
+map = fun_defMap; % 定义地图
 stepLength = 2;            % 步长
 
 %% 算法
@@ -75,10 +75,26 @@ end
 
 % 路径长度
 path_diff = diff(path_opt);
-len = sum(sqrt(path_diff(:,1).^2 + path_diff(:,2).^2));
-pathNode = size(path_opt, 1);
-sampleNode = size(treeNodes1, 2);
+path_len = sum(sqrt(path_diff(:,1).^2 + path_diff(:,2).^2));
+pathNode_size = size(path_opt, 1);
+    i = 1; % 当前检测点索引
+    angle = zeros(size(path_opt, 1)-2,1);
+    while i <= size(path_opt, 1)-2
+        % 获取连续三个路径点
+        p1 = path_opt(i, :);
+        p2 = path_opt(i+1, :);
+        p3 = path_opt(i+2, :);
+        
+        % 计算路径转折角度
+        vec1 = p2 - p1;   % 前向向量
+        vec2 = p3 - p2;   % 后向向量
+        cos_theta = dot(vec1, vec2)/(norm(vec1)*norm(vec2));
+        angle(i) = acos(min(max(cos_theta,-1),1)); % 数值安全处理
+        i = i + 1;
+    end
+sum_ang = sum(angle);
+sampleNode_size = size(treeNodes, 2);
 time = toc;
 
 %% 画图
-% plotFigureRrtStar(map_size,startPos, goalPos, map, treeNodes,path_opt)
+% plotFigure(map_size,startPos, goalPos, map, treeNodes,path_opt)
